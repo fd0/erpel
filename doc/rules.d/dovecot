@@ -1,0 +1,7 @@
+dovecot: imap-login: Login: user=<\S+>, method=PLAIN, rip=IP, lip=IP(, mpid=\d+)?, TLS(, session=<\S+>)?$
+dovecot: imap-login: Login: user=<\S+>, method=PLAIN, rip=::1, lip=::1, secured$
+dovecot: (lda|imap|pop3)\(\S+\): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead$
+dovecot: lda\(\S+\): sieve: msgid=<\S+>: stored mail into mailbox '\S+'$
+dovecot: IMAP\(\S+\): Disconnected: Logged out bytes=\d+\d+$
+dovecot: imap-login: Disconnected \(no auth attempts in \d+ secs\): user=<>, rip=[0-9a-f:.]+, lip=[0-9a-f:.]+, TLS handshaking: Disconnected, session=<\S+>$
+dovecot: imap\(\S+\): Disconnected: Logged out in=\d+ out=\d+$

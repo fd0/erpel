@@ -1,0 +1,4 @@
+rsyslogd: \[origin software="rsyslogd" swVersion="8.4.2" x-pid="\d+" x-info="http://www.rsyslog.com"\] rsyslogd was HUPed$
+rsyslogd0: action 'action 17' resumed \(module 'builtin:ompipe'\) \[try http://www.rsyslog.com/e/0 \]$
+rsyslogd-2359: action 'action 17' resumed \(module 'builtin:ompipe'\) \[try http://www.rsyslog.com/e/2359 \]$
+rsyslogd: \[origin software="rsyslogd" swVersion="8.4.2" x-pid="\d+" x-info="http://www.rsyslog.com"\] rsyslogd was HUPed$
