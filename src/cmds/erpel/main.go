@@ -1,16 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"erpel"
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/jessevdk/go-flags"
 )
 
 var opts = &struct {
-	Verbose bool   `short:"v" long:"verbose" description:"be verbose"`
-	Config  string `short:"c" long:"config" env:"ERPEL_CONFIG" default:"/etc/erpel/erpel.conf" description:"configuration file"`
+	Verbose  bool     `short:"v" long:"verbose" description:"be verbose"`
+	Config   string   `short:"c" long:"config" env:"ERPEL_CONFIG" default:"/etc/erpel/erpel.conf" description:"configuration file"`
+	Logfiles []string `short:"l" long:"logfile" description:"logfile to process"`
 }{}
 
 // V prints the message when verbose is active.
@@ -55,17 +59,62 @@ func main() {
 	}
 	Erx(err, 1)
 
+	if len(opts.Logfiles) == 0 {
+		E("no logfile specified, use --logfile\n")
+		os.Exit(1)
+	}
+
 	cfg, err := erpel.LoadConfig(opts.Config)
 	if err != nil {
 		Erx(err, 2)
 	}
 
-	fmt.Printf("cfg: %v\n", cfg)
+	V("config loaded from %v\n", opts.Config)
 
 	rules, err := erpel.LoadAllRules(cfg.RulesDir)
 	if err != nil {
 		Erx(err, 3)
 	}
 
-	fmt.Printf("loaded %v rules\n", len(rules))
+	V("loaded %v rules from %v\n", len(rules), cfg.RulesDir)
+
+	filter := erpel.Filter{
+		Rules: rules,
+	}
+
+	if cfg.Prefix != "" {
+		r, err := regexp.Compile(cfg.Prefix)
+		if err != nil {
+			Erx(err, 4)
+		}
+
+		filter.Prefix = r
+	}
+
+	for _, logfile := range opts.Logfiles {
+		V("processing %v\n", logfile)
+
+		f, err := os.Open(logfile)
+		if err != nil {
+			E("error opening logfile %v: %v\n", logfile, err)
+			continue
+		}
+
+		sc := bufio.NewScanner(f)
+		for sc.Scan() {
+			line := strings.TrimSpace(sc.Text())
+
+			result := filter.Process([]string{line})
+
+			for _, line := range result {
+				fmt.Println(line)
+			}
+		}
+
+		err = f.Close()
+		if err != nil {
+			E("error closing logfile %v: %v\n", logfile, err)
+			continue
+		}
+	}
 }
