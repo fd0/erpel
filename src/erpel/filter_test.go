@@ -50,7 +50,7 @@ func TestFilter(t *testing.T) {
 	for i, test := range filterTests {
 		filter := Filter{
 			Prefix: test.prefix,
-			Rules: test.rules,
+			Rules:  test.rules,
 		}
 
 		result := filter.Process(test.messages)
