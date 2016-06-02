@@ -33,6 +33,7 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, probe.Trace(err, string(buf))
 	}
 
+	cfg.Prefix = strings.TrimSpace(cfg.Prefix)
 	if cfg.Prefix != "" {
 		// add begining-of-line matching if not already present
 		if cfg.Prefix[0] != '^' {
@@ -45,6 +46,8 @@ func LoadConfig(filename string) (*Config, error) {
 		}
 
 		cfg.prefix = r
+	} else {
+		cfg.prefix = regexp.MustCompile("^")
 	}
 
 	return cfg, nil

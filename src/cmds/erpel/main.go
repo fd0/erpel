@@ -13,6 +13,7 @@ import (
 
 var opts = &struct {
 	Verbose  bool     `short:"v" long:"verbose" description:"be verbose"`
+	Debug    bool     `          long:"debug" description:"turn on debugging"`
 	Config   string   `short:"c" long:"config" env:"ERPEL_CONFIG" default:"/etc/erpel/erpel.conf" description:"configuration file"`
 	Logfiles []string `short:"l" long:"logfile" description:"logfile to process"`
 }{}
@@ -20,6 +21,15 @@ var opts = &struct {
 // V prints the message when verbose is active.
 func V(format string, args ...interface{}) {
 	if !opts.Verbose {
+		return
+	}
+
+	fmt.Printf(format, args...)
+}
+
+// D prints the message when debug is active.
+func D(format string, args ...interface{}) {
+	if !opts.Debug {
 		return
 	}
 
@@ -70,6 +80,7 @@ func main() {
 	}
 
 	V("config loaded from %v\n", opts.Config)
+	D("  config: %#v\n", cfg)
 
 	rules, err := erpel.LoadAllRules(cfg.RulesDir)
 	if err != nil {
@@ -77,6 +88,12 @@ func main() {
 	}
 
 	V("loaded %v rules from %v\n", len(rules), cfg.RulesDir)
+
+	if opts.Debug {
+		for _, rule := range rules {
+			D("  Rule: %v\n", rule)
+		}
+	}
 
 	filter := erpel.Filter{
 		Rules: rules,
@@ -90,6 +107,8 @@ func main() {
 
 		filter.Prefix = r
 	}
+
+	D("  global prefix is %v\n", filter.Prefix)
 
 	for _, logfile := range opts.Logfiles {
 		V("processing %v\n", logfile)

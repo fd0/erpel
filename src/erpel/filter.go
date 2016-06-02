@@ -1,6 +1,9 @@
 package erpel
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 // Filter drops lines matching a set of ignore rules.
 type Filter struct {
@@ -33,6 +36,8 @@ nextInput:
 			result = append(result, line)
 			continue
 		}
+
+		suffix = strings.TrimSpace(suffix)
 
 		for _, r := range f.Rules {
 			if r.MatchString(suffix) {
