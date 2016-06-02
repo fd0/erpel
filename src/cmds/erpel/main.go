@@ -82,7 +82,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := erpel.LoadAllRules(cfg.RulesDir)
+	rules, err := erpel.LoadAllRules(cfg, cfg.RulesDir)
 	if err != nil {
 		Erx(err, 3)
 	}
@@ -92,6 +92,10 @@ func main() {
 	if opts.Debug {
 		for _, rule := range rules {
 			D("  Rule: %v\n", rule)
+		}
+
+		for _, alias := range cfg.Aliases {
+			D("  Alias %v -> %v\n", alias.Name, alias.Regex)
 		}
 	}
 

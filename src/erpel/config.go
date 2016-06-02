@@ -14,10 +14,17 @@ import (
 
 // Config configures an erpel instance.
 type Config struct {
-	RulesDir string `hcl:"rules_dir"`
-	Prefix   string `hcl:"prefix"`
+	RulesDir string  `hcl:"rules_dir"`
+	Prefix   string  `hcl:"prefix"`
+	Aliases  []Alias `hcl:"alias"`
 
 	prefix *regexp.Regexp
+}
+
+// Alias is used to replace a string with a regexp.
+type Alias struct {
+	Name  string `hcl:"name,key"`
+	Regex string `hcl:"regex"`
 }
 
 // LoadConfig unmarshals the configuration contained in the file.
@@ -54,15 +61,15 @@ func LoadConfig(filename string) (*Config, error) {
 }
 
 // LoadAllRules loads all rules from files in dir.
-func LoadAllRules(dir string) (rules []*regexp.Regexp, err error) {
-	pattern := filepath.Join(dir, "*")
+func LoadAllRules(cfg *Config) (rules []*regexp.Regexp, err error) {
+	pattern := filepath.Join(cfg.RulesDir, "*")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		return nil, probe.Trace(err, pattern)
 	}
 
 	for _, file := range matches {
-		r, err := LoadRules(file)
+		r, err := LoadRules(cfg, file)
 		if err != nil {
 			return nil, probe.Trace(err, file)
 		}
@@ -74,7 +81,7 @@ func LoadAllRules(dir string) (rules []*regexp.Regexp, err error) {
 }
 
 // LoadRules unmarshals a rules file.
-func LoadRules(filename string) (rules []*regexp.Regexp, err error) {
+func LoadRules(cfg *Config, filename string) (rules []*regexp.Regexp, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, probe.Trace(err, filename)
@@ -102,6 +109,11 @@ func LoadRules(filename string) (rules []*regexp.Regexp, err error) {
 		// add beginning-of-line matching if not already present
 		if line[0] != '^' {
 			line = "^" + line
+		}
+
+		// replace aliases
+		for _, alias := range cfg.Aliases {
+			line = strings.Replace(line, alias.Name, alias.Regex, -1)
 		}
 
 		r, err := regexp.Compile(line)
