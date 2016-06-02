@@ -1,0 +1,23 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/fd0/probe",
+			"repository": "https://github.com/fd0/probe",
+			"revision": "94b81941524982e014fb96eec0dd764c6b9a04df",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/hashicorp/hcl",
+			"repository": "https://github.com/hashicorp/hcl",
+			"revision": "9a905a34e6280ce905da1a32344b25e81011197a",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/jessevdk/go-flags",
+			"repository": "https://github.com/jessevdk/go-flags",
+			"revision": "b9b882a3990882b05e02765f5df2cd3ad02874ee",
+			"branch": "master"
+		}
+	]
+}
