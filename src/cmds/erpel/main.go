@@ -82,7 +82,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := erpel.LoadAllRules(cfg, cfg.RulesDir)
+	rules, err := erpel.LoadAllRules(cfg)
 	if err != nil {
 		Erx(err, 3)
 	}

@@ -20,13 +20,15 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestLoadRules(t *testing.T) {
+	cfg := &Config{}
+
 	files, err := filepath.Glob(filepath.Join("testdata", "rules_test_*.hcl"))
 	if err != nil {
 		t.Fatalf("error loading sample rules files: %v", err)
 	}
 
 	for _, filename := range files {
-		_, err := LoadRules(filename)
+		_, err := LoadRules(cfg, filename)
 		if err != nil {
 			t.Errorf("loading rules from file %v failed: %v", filename, err)
 		}
@@ -34,7 +36,8 @@ func TestLoadRules(t *testing.T) {
 }
 
 func TestLoadInvalidRules(t *testing.T) {
-	rules, err := LoadRules(filepath.Join("testdata", "rules_invalid.hcl"))
+	cfg := &Config{}
+	rules, err := LoadRules(cfg, filepath.Join("testdata", "rules_invalid.hcl"))
 	if err == nil {
 		t.Fatalf("expected load error not found, got nil")
 	}
