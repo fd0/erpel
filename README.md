@@ -6,7 +6,7 @@ Filter log messages and only print those which did not match any filters.
 
 # Installation
 
-erpel requires Go version 1.4 or newer. To build dachs, run the following command:
+erpel requires Go version 1.4 or newer. To build `erpel`, run the following command:
 
 ```shell
 $ go run build.go
