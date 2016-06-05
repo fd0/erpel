@@ -1,0 +1,22 @@
+package config
+
+type erpelParser Peg {
+    erpelCfg
+}
+
+start <- (line EOL)* line? EOF
+
+line <- _ (Statement / Comment)? _
+
+Statement <- Name _ '=' _ Value { p.set(p.name, p.value) }
+
+Name <- < [[a-z0-9_-]]+ > { p.name = buffer[begin:end] }
+
+Value <- < [^\r\n]* > { p.value = buffer[begin:end] }
+
+Comment <- _ '#' <[^\r\n]*>
+
+Any <- !EOL
+EOF <- !.
+EOL <- [\r\n]+
+_ <- [ \t]*
