@@ -1,40 +1,110 @@
 package config
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
-var testConfigs = []string{
-	``,
-	`a=b`,
-	`a =b  `,
-	`  x = y`,
-	`a    = b=`,
-	`
-foo = bar
-baz= bumppp
-	`,
-	`xx=1
+var testConfigs = []struct {
+	cfg   string
+	state configState
+}{
+	{
+		cfg: ``,
+	},
+	{
+		cfg: `a=b`,
+		state: configState{
+			stmts: map[string]string{
+				"a": "b",
+			},
+		},
+	},
+	{
+		cfg: `a =b  `,
+		state: configState{
+			stmts: map[string]string{
+				"a": "b  ",
+			},
+		},
+	},
+	{
+		cfg: `  x = y`,
+		state: configState{
+			stmts: map[string]string{
+				"x": "y",
+			},
+		},
+	},
+	{
+		cfg: `a    = b=`,
+		state: configState{
+			stmts: map[string]string{
+				"a": "b=",
+			},
+		},
+	},
+	{
+		cfg: `
+		foo = bar
+		baz= bumppp
+		`,
+		state: configState{
+			stmts: map[string]string{
+				"foo": "bar",
+				"baz": "bumppp",
+			},
+		},
+	},
+	{
+		cfg: `xx=1
 yy=2 a oesu saoe ustha osenuthh
 # comment
-key =Value!    
 # comment with spaces
 zz=3
-	`,
+key =Value!    `,
+		state: configState{
+			stmts: map[string]string{
+				"xx":  "1",
+				"yy":  "2 a oesu saoe ustha osenuthh",
+				"key": "Value!    ",
+				"zz":  "3",
+			},
+		},
+	},
+	{
+		cfg: `foo=bar
+test = foobar`,
+		state: configState{
+			stmts: map[string]string{
+				"foo":  "bar",
+				"test": "foobar ",
+			},
+		},
+	},
 }
 
-func TestConfigFile(t *testing.T) {
-	for i, testConfig := range testConfigs {
-		cfg, err := Parse(testConfig)
+func TestParseConfig(t *testing.T) {
+	for i, test := range testConfigs {
+		state, err := parseConfig(test.cfg)
 		if err != nil {
 			t.Errorf("config %d: failed to parse failed: %v", i, err)
 			continue
 		}
 
-		fmt.Printf("statements:\n")
-		for k, v := range cfg.Statements {
-			fmt.Printf("  %q = %q\n", k, v)
+		for key, v1 := range test.state.stmts {
+			v2, ok := state.stmts[key]
+			if !ok {
+				t.Errorf("test %v: missing statement %q in state parsed from config", i, key)
+				continue
+			}
+
+			if v1 != v2 {
+				t.Errorf("test %v: wrong value for %q: want %q, got %q", i, key, v1, v2)
+			}
+		}
+
+		for key, value := range state.stmts {
+			if _, ok := test.state.stmts[key]; !ok {
+				t.Errorf("test %v: unexpected statement %q found in parsed state (value is %q)", i, key, value)
+			}
 		}
 	}
 

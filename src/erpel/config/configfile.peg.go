@@ -366,7 +366,7 @@ func (t *tokens32) Expand(index int) tokenTree {
 }
 
 type erpelParser struct {
-	erpelCfg
+	configState
 
 	Buffer string
 	buffer []rune
