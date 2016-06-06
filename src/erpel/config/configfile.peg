@@ -4,19 +4,23 @@ type erpelParser Peg {
     configState
 }
 
+# this is the entry point to the grammar
 start <- (line EOL)* line? EOF
 
 line <- _ (Statement / Comment)? _
 
 Statement <- Name _ '=' _ Value { p.set(p.name, p.value) }
 
+# the name is limited to characters, numbers, _ and -
 Name <- < [[a-z0-9_-]]+ > { p.name = buffer[begin:end] }
 
-Value <- < [^\r\n]* > { p.value = buffer[begin:end] }
+# value is everyting to the end of the line or a space
+Value <- < ( ![\r\n \t] . )* > { p.value = buffer[begin:end] }
 
-Comment <- _ '#' <[^\r\n]*>
+# comment to the end of the line
+Comment <- _ '#' (!EOL .)*
 
 Any <- !EOL
 EOF <- !.
-EOL <- [\r\n]+
+EOL <- [\r\n]
 _ <- [ \t]*
