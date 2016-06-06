@@ -1,6 +1,8 @@
 package config
 
 import (
+	"io/ioutil"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -99,5 +101,17 @@ func TestUnquoteString(t *testing.T) {
 			t.Errorf("test %d: unquoteString(%q) return wrong result: want %q, got %q", i, test.data, test.result, s)
 			continue
 		}
+	}
+}
+
+func TestSampleConfig(t *testing.T) {
+	buf, err := ioutil.ReadFile(filepath.Join("testdata", "erpel.conf"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = Parse(string(buf))
+	if err != nil {
+		t.Fatalf("parsing sample config failed: %v", err)
 	}
 }
