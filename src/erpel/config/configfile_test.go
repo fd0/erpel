@@ -63,7 +63,7 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: ` foo = bar
-# test comment
+	# test comment
 	baz= bumppp
 		`,
 		state: configState{
@@ -83,11 +83,11 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `xx=1
-yy=2 a oesu saoe ustha osenuthh
-# comment
-# comment with spaces
-zz=3
-key =Value!    `,
+	yy=2 a oesu saoe ustha osenuthh
+	# comment
+	# comment with spaces
+	zz=3
+	key =Value!    `,
 		state: configState{
 			stmts: map[string]string{
 				"xx":  "1",
@@ -99,11 +99,56 @@ key =Value!    `,
 	},
 	{
 		cfg: `foo=bar
-test = foobar`,
+	test = foobar`,
 		state: configState{
 			stmts: map[string]string{
 				"foo":  "bar",
 				"test": "foobar",
+			},
+		},
+	},
+	{
+		cfg: `test = "foobar"`,
+		state: configState{
+			stmts: map[string]string{
+				"test": `"foobar"`,
+			},
+		},
+	},
+	{
+		cfg: `test = "foo\nb\"ar"`,
+		state: configState{
+			stmts: map[string]string{
+				"test": `"foo\nb\"ar"`,
+			},
+		},
+	},
+	{
+		cfg: `test = '  foo bar'  `,
+		state: configState{
+			stmts: map[string]string{
+				"test": `'  foo bar'`,
+			},
+		},
+	},
+	{
+		cfg: `test = '  foo \'bar'  `,
+		state: configState{
+			stmts: map[string]string{
+				"test": `'  foo \'bar'`,
+			},
+		},
+	},
+	{
+		cfg: `foo=bar
+test = "foobar"
+# comment
+x =   "y! "`,
+		state: configState{
+			stmts: map[string]string{
+				"foo":  "bar",
+				"test": `"foobar"`,
+				"x":    `"y! "`,
 			},
 		},
 	},
