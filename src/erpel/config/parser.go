@@ -34,11 +34,6 @@ func (c *configState) set(key, value string) {
 	c.currentSection[key] = value
 }
 
-// Config holds all configuration from a config file.
-type Config struct {
-	Statements map[string]string
-}
-
 // parseConfig returns the state for a configuration.
 func parseConfig(data string) (configState, error) {
 	defaultSection := make(section)
@@ -62,11 +57,6 @@ func parseConfig(data string) (configState, error) {
 	c.Execute()
 
 	return c.configState, nil
-}
-
-// parseState returns a Config struct from a state.
-func parseState(state configState) (Config, error) {
-	return Config{}, nil
 }
 
 // Parse parses the data as an erpel config file.
