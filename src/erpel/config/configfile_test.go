@@ -8,44 +8,57 @@ var testConfigs = []struct {
 }{
 	{
 		cfg: ``,
+		state: configState{
+			sections: map[string]section{
+				"": section{},
+			},
+		},
 	},
 	{
 		cfg: `afoo=   `,
 		state: configState{
-			stmts: map[string]string{
-				"afoo": "",
+			sections: map[string]section{
+				"": section{"afoo": ""},
 			},
 		},
 	},
 	{
 		cfg: `a=b`,
 		state: configState{
-			stmts: map[string]string{
-				"a": "b",
+			sections: map[string]section{
+				"": section{
+					"a": "b",
+				},
 			},
 		},
 	},
 	{
 		cfg: `a =b  `,
 		state: configState{
-			stmts: map[string]string{
-				"a": "b",
+			sections: map[string]section{
+				"": section{
+					"a": "b",
+				},
 			},
 		},
 	},
 	{
 		cfg: `  x = y`,
 		state: configState{
-			stmts: map[string]string{
-				"x": "y",
+			sections: map[string]section{
+				"": section{
+					"x": "y",
+				},
 			},
 		},
 	},
 	{
 		cfg: `a    = b=`,
 		state: configState{
-			stmts: map[string]string{
-				"a": "b=",
+			sections: map[string]section{
+				"": section{
+					"a": "b=",
+				},
 			},
 		},
 	},
@@ -55,9 +68,11 @@ var testConfigs = []struct {
 		baz= bumppp
 		`,
 		state: configState{
-			stmts: map[string]string{
-				"foo": "bar",
-				"baz": "bumppp",
+			sections: map[string]section{
+				"": section{
+					"foo": "bar",
+					"baz": "bumppp",
+				},
 			},
 		},
 	},
@@ -67,17 +82,21 @@ var testConfigs = []struct {
 	baz= bumppp
 		`,
 		state: configState{
-			stmts: map[string]string{
-				"foo": "bar",
-				"baz": "bumppp",
+			sections: map[string]section{
+				"": section{
+					"foo": "bar",
+					"baz": "bumppp",
+				},
 			},
 		},
 	},
 	{
 		cfg: ` foo = bar baz `,
 		state: configState{
-			stmts: map[string]string{
-				"foo": "bar baz",
+			sections: map[string]section{
+				"": section{
+					"foo": "bar baz",
+				},
 			},
 		},
 	},
@@ -89,11 +108,13 @@ var testConfigs = []struct {
 	zz=3
 	key =Value!    `,
 		state: configState{
-			stmts: map[string]string{
-				"xx":  "1",
-				"yy":  "2 a oesu saoe ustha osenuthh",
-				"key": "Value!",
-				"zz":  "3",
+			sections: map[string]section{
+				"": section{
+					"xx":  "1",
+					"yy":  "2 a oesu saoe ustha osenuthh",
+					"key": "Value!",
+					"zz":  "3",
+				},
 			},
 		},
 	},
@@ -101,41 +122,51 @@ var testConfigs = []struct {
 		cfg: `foo=bar
 	test = foobar`,
 		state: configState{
-			stmts: map[string]string{
-				"foo":  "bar",
-				"test": "foobar",
+			sections: map[string]section{
+				"": section{
+					"foo":  "bar",
+					"test": "foobar",
+				},
 			},
 		},
 	},
 	{
 		cfg: `test = "foobar"`,
 		state: configState{
-			stmts: map[string]string{
-				"test": `"foobar"`,
+			sections: map[string]section{
+				"": section{
+					"test": `"foobar"`,
+				},
 			},
 		},
 	},
 	{
 		cfg: `test = "foo\nb\"ar"`,
 		state: configState{
-			stmts: map[string]string{
-				"test": `"foo\nb\"ar"`,
+			sections: map[string]section{
+				"": section{
+					"test": `"foo\nb\"ar"`,
+				},
 			},
 		},
 	},
 	{
 		cfg: `test = '  foo bar'  `,
 		state: configState{
-			stmts: map[string]string{
-				"test": `'  foo bar'`,
+			sections: map[string]section{
+				"": section{
+					"test": `'  foo bar'`,
+				},
 			},
 		},
 	},
 	{
 		cfg: `test = '  foo \'bar'  `,
 		state: configState{
-			stmts: map[string]string{
-				"test": `'  foo \'bar'`,
+			sections: map[string]section{
+				"": section{
+					"test": `'  foo \'bar'`,
+				},
 			},
 		},
 	},
@@ -145,10 +176,38 @@ test = "foobar"
 # comment
 x =   "y! "`,
 		state: configState{
-			stmts: map[string]string{
-				"foo":  "bar",
-				"test": `"foobar"`,
-				"x":    `"y! "`,
+			sections: map[string]section{
+				"": section{
+					"foo":  "bar",
+					"test": `"foobar"`,
+					"x":    `"y! "`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `global_setting1 = value1
+glob_set2 = "foobar"
+# comment
+x =   "y! "
+
+# introduce another section
+[local_rules]
+
+loc_set1 = v1
+loc_set2 = "this is just a test"
+`,
+		state: configState{
+			sections: map[string]section{
+				"": section{
+					"global_setting1": "value1",
+					"glob_set2":       `"foobar"`,
+					"x":               `"y! "`,
+				},
+				"local_rules": section{
+					"loc_set1": "v1",
+					"loc_set2": `"this is just a test"`,
+				},
 			},
 		},
 	},
@@ -162,23 +221,37 @@ func TestParseConfig(t *testing.T) {
 			continue
 		}
 
-		for key, v1 := range test.state.stmts {
-			v2, ok := state.stmts[key]
+		for secName, section := range test.state.sections {
+			sec, ok := state.sections[secName]
 			if !ok {
-				t.Errorf("test %v: missing statement %q in state parsed from config", i, key)
+				t.Errorf("test %v: section %q not found in parsed result", i, secName)
 				continue
 			}
 
-			if v1 != v2 {
-				t.Errorf("test %v: wrong value for %q: want %q, got %q", i, key, v1, v2)
+			for key, v1 := range section {
+				v2, ok := sec[key]
+				if !ok {
+					t.Errorf("test %v: missing statement %q in state parsed from config", i, key)
+					continue
+				}
+
+				if v1 != v2 {
+					t.Errorf("test %v: wrong value for %q: want %q, got %q", i, key, v1, v2)
+				}
+			}
+
+			for key, value := range sec {
+				if _, ok := section[key]; !ok {
+					t.Errorf("test %v: unexpected statement %q found in parsed state (value is %q)", i, key, value)
+				}
 			}
 		}
 
-		for key, value := range state.stmts {
-			if _, ok := test.state.stmts[key]; !ok {
-				t.Errorf("test %v: unexpected statement %q found in parsed state (value is %q)", i, key, value)
+		for secName := range state.sections {
+			_, ok := test.state.sections[secName]
+			if !ok {
+				t.Errorf("test %v: unexpected section %q found in parsed result", i, secName)
 			}
 		}
 	}
-
 }

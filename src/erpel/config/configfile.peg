@@ -7,11 +7,13 @@ type erpelParser Peg {
 # this is the entry point to the grammar
 start <- (line EOL)* line? EOF
 
-line <- _ (Comment / Statement)? _
+line <- _ (Comment / Section / Statement)? _
 
-Statement <- Name _ '=' _ Value { p.set(p.name, p.value) }
+Section <- "[" < ( !"]" !EOL . )+ > "]"                    { p.newSection(buffer[begin:end]) }
 
-Name <- < (!'=' .)+ > { p.name = buffer[begin:end] }
+Statement <- Name _ '=' _ Value                            { p.set(p.name, p.value) }
+
+Name <- < (!'=' !EOL .)+ > { p.name = buffer[begin:end] }
 
 Value <- DoubleQuotedValue / SingleQuotedvalue / RawValue
 

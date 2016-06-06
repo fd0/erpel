@@ -10,17 +10,28 @@ import (
 
 // configState is the internal state used for parsing the config file.
 type configState struct {
-	// used during parsing to temporarily store name and value of a statement
+	// used to temporarily store values while parsing
 	name, value string
 
+	currentSection section
+
 	// collection of all statements encountered during parsing
-	stmts map[string]string
+	sections map[string]section
+}
+
+type section map[string]string
+
+func (c *configState) newSection(name string) {
+	name = strings.TrimSpace(name)
+	sec := make(section)
+	c.sections[name] = sec
+	c.currentSection = sec
 }
 
 func (c *configState) set(key, value string) {
 	key = strings.TrimSpace(key)
 	value = strings.TrimSpace(value)
-	c.stmts[key] = value
+	c.currentSection[key] = value
 }
 
 // Config holds all configuration from a config file.
@@ -30,9 +41,14 @@ type Config struct {
 
 // parseConfig returns the state for a configuration.
 func parseConfig(data string) (configState, error) {
+	defaultSection := make(section)
+	sections := make(map[string]section)
+	sections[""] = defaultSection
+
 	c := &erpelParser{
 		configState: configState{
-			stmts: make(map[string]string),
+			currentSection: defaultSection,
+			sections:       sections,
 		},
 		Buffer: data,
 	}
