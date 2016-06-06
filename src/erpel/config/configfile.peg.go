@@ -23,7 +23,6 @@ const (
 	ruleDoubleQuotedValue
 	ruleRawValue
 	ruleComment
-	ruleAny
 	ruleEOF
 	ruleEOL
 	rule_
@@ -50,7 +49,6 @@ var rul3s = [...]string{
 	"DoubleQuotedValue",
 	"RawValue",
 	"Comment",
-	"Any",
 	"EOF",
 	"EOL",
 	"_",
@@ -380,7 +378,7 @@ type erpelParser struct {
 
 	Buffer string
 	buffer []rune
-	rules  [20]func() bool
+	rules  [19]func() bool
 	Parse  func(rule ...int) error
 	Reset  func()
 	Pretty bool
@@ -963,93 +961,91 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position50, tokenIndex50, depth50
 			return false
 		},
-		/* 9 Any <- <!EOL> */
-		nil,
-		/* 10 EOF <- <!.> */
+		/* 9 EOF <- <!.> */
 		func() bool {
-			position56, tokenIndex56, depth56 := position, tokenIndex, depth
+			position55, tokenIndex55, depth55 := position, tokenIndex, depth
 			{
-				position57 := position
+				position56 := position
 				depth++
 				{
-					position58, tokenIndex58, depth58 := position, tokenIndex, depth
+					position57, tokenIndex57, depth57 := position, tokenIndex, depth
 					if !matchDot() {
+						goto l57
+					}
+					goto l55
+				l57:
+					position, tokenIndex, depth = position57, tokenIndex57, depth57
+				}
+				depth--
+				add(ruleEOF, position56)
+			}
+			return true
+		l55:
+			position, tokenIndex, depth = position55, tokenIndex55, depth55
+			return false
+		},
+		/* 10 EOL <- <('\r' / '\n')> */
+		func() bool {
+			position58, tokenIndex58, depth58 := position, tokenIndex, depth
+			{
+				position59 := position
+				depth++
+				{
+					position60, tokenIndex60, depth60 := position, tokenIndex, depth
+					if buffer[position] != rune('\r') {
+						goto l61
+					}
+					position++
+					goto l60
+				l61:
+					position, tokenIndex, depth = position60, tokenIndex60, depth60
+					if buffer[position] != rune('\n') {
 						goto l58
 					}
-					goto l56
-				l58:
-					position, tokenIndex, depth = position58, tokenIndex58, depth58
-				}
-				depth--
-				add(ruleEOF, position57)
-			}
-			return true
-		l56:
-			position, tokenIndex, depth = position56, tokenIndex56, depth56
-			return false
-		},
-		/* 11 EOL <- <('\r' / '\n')> */
-		func() bool {
-			position59, tokenIndex59, depth59 := position, tokenIndex, depth
-			{
-				position60 := position
-				depth++
-				{
-					position61, tokenIndex61, depth61 := position, tokenIndex, depth
-					if buffer[position] != rune('\r') {
-						goto l62
-					}
-					position++
-					goto l61
-				l62:
-					position, tokenIndex, depth = position61, tokenIndex61, depth61
-					if buffer[position] != rune('\n') {
-						goto l59
-					}
 					position++
 				}
-			l61:
+			l60:
 				depth--
-				add(ruleEOL, position60)
+				add(ruleEOL, position59)
 			}
 			return true
-		l59:
-			position, tokenIndex, depth = position59, tokenIndex59, depth59
+		l58:
+			position, tokenIndex, depth = position58, tokenIndex58, depth58
 			return false
 		},
-		/* 12 _ <- <(' ' / '\t')*> */
+		/* 11 _ <- <(' ' / '\t')*> */
 		func() bool {
 			{
-				position64 := position
+				position63 := position
 				depth++
-			l65:
+			l64:
 				{
-					position66, tokenIndex66, depth66 := position, tokenIndex, depth
+					position65, tokenIndex65, depth65 := position, tokenIndex, depth
 					{
-						position67, tokenIndex67, depth67 := position, tokenIndex, depth
+						position66, tokenIndex66, depth66 := position, tokenIndex, depth
 						if buffer[position] != rune(' ') {
-							goto l68
+							goto l67
 						}
 						position++
-						goto l67
-					l68:
-						position, tokenIndex, depth = position67, tokenIndex67, depth67
+						goto l66
+					l67:
+						position, tokenIndex, depth = position66, tokenIndex66, depth66
 						if buffer[position] != rune('\t') {
-							goto l66
+							goto l65
 						}
 						position++
 					}
-				l67:
-					goto l65
 				l66:
-					position, tokenIndex, depth = position66, tokenIndex66, depth66
+					goto l64
+				l65:
+					position, tokenIndex, depth = position65, tokenIndex65, depth65
 				}
 				depth--
-				add(rule_, position64)
+				add(rule_, position63)
 			}
 			return true
 		},
-		/* 14 Action0 <- <{ p.set(p.name, p.value) }> */
+		/* 13 Action0 <- <{ p.set(p.name, p.value) }> */
 		func() bool {
 			{
 				add(ruleAction0, position)
@@ -1057,28 +1053,28 @@ func (p *erpelParser) Init() {
 			return true
 		},
 		nil,
-		/* 16 Action1 <- <{ p.name = buffer[begin:end] }> */
+		/* 15 Action1 <- <{ p.name = buffer[begin:end] }> */
 		func() bool {
 			{
 				add(ruleAction1, position)
 			}
 			return true
 		},
-		/* 17 Action2 <- <{ p.value = buffer[begin:end] }> */
+		/* 16 Action2 <- <{ p.value = buffer[begin:end] }> */
 		func() bool {
 			{
 				add(ruleAction2, position)
 			}
 			return true
 		},
-		/* 18 Action3 <- <{ p.value = buffer[begin:end] }> */
+		/* 17 Action3 <- <{ p.value = buffer[begin:end] }> */
 		func() bool {
 			{
 				add(ruleAction3, position)
 			}
 			return true
 		},
-		/* 19 Action4 <- <{ p.value = buffer[begin:end] }> */
+		/* 18 Action4 <- <{ p.value = buffer[begin:end] }> */
 		func() bool {
 			{
 				add(ruleAction4, position)

@@ -22,7 +22,6 @@ RawValue <- < ( !EOL . )* >                                { p.value = buffer[be
 # comment to the end of the line
 Comment <- _ '#' (!EOL .)*
 
-Any <- !EOL
 EOF <- !.
 EOL <- [\r\n]
 _ <- [ \t]*
