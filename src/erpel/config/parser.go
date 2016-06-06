@@ -1,6 +1,10 @@
 package config
 
-import "github.com/fd0/probe"
+import (
+	"strings"
+
+	"github.com/fd0/probe"
+)
 
 //go:generate peg configfile.peg
 
@@ -14,7 +18,7 @@ type configState struct {
 }
 
 func (c *configState) set(key, value string) {
-	c.stmts[key] = value
+	c.stmts[key] = strings.TrimSpace(value)
 }
 
 // Config holds all configuration from a config file.

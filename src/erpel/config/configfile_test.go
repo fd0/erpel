@@ -10,6 +10,14 @@ var testConfigs = []struct {
 		cfg: ``,
 	},
 	{
+		cfg: `afoo=   `,
+		state: configState{
+			stmts: map[string]string{
+				"afoo": "",
+			},
+		},
+	},
+	{
 		cfg: `a=b`,
 		state: configState{
 			stmts: map[string]string{
@@ -65,40 +73,40 @@ var testConfigs = []struct {
 			},
 		},
 	},
-	// {
-	// 	cfg: ` foo = bar baz `,
-	// 	state: configState{
-	// 		stmts: map[string]string{
-	// 			"foo": "bar baz",
-	// 		},
-	// 	},
-	// },
-	// {
-	// 	cfg: `xx=1
-	// yy=2 a oesu saoe ustha osenuthh
-	// # comment
-	// # comment with spaces
-	// zz=3
-	// key =Value!    `,
-	// 	state: configState{
-	// 		stmts: map[string]string{
-	// 			"xx":  "1",
-	// 			"yy":  "2 a oesu saoe ustha osenuthh",
-	// 			"key": "Value!",
-	// 			"zz":  "3",
-	// 		},
-	// 	},
-	// },
-	// {
-	// 	cfg: `foo=bar
-	// test = foobar`,
-	// 	state: configState{
-	// 		stmts: map[string]string{
-	// 			"foo":  "bar",
-	// 			"test": "foobar",
-	// 		},
-	// 	},
-	// },
+	{
+		cfg: ` foo = bar baz `,
+		state: configState{
+			stmts: map[string]string{
+				"foo": "bar baz",
+			},
+		},
+	},
+	{
+		cfg: `xx=1
+yy=2 a oesu saoe ustha osenuthh
+# comment
+# comment with spaces
+zz=3
+key =Value!    `,
+		state: configState{
+			stmts: map[string]string{
+				"xx":  "1",
+				"yy":  "2 a oesu saoe ustha osenuthh",
+				"key": "Value!",
+				"zz":  "3",
+			},
+		},
+	},
+	{
+		cfg: `foo=bar
+test = foobar`,
+		state: configState{
+			stmts: map[string]string{
+				"foo":  "bar",
+				"test": "foobar",
+			},
+		},
+	},
 }
 
 func TestParseConfig(t *testing.T) {

@@ -732,7 +732,7 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position14, tokenIndex14, depth14
 			return false
 		},
-		/* 4 Value <- <(<(!('\r' / '\n' / ' ' / '\t') .)*> Action2)> */
+		/* 4 Value <- <(<(!EOL .)*> Action2)> */
 		func() bool {
 			position27, tokenIndex27, depth27 := position, tokenIndex, depth
 			{
@@ -746,35 +746,9 @@ func (p *erpelParser) Init() {
 						position31, tokenIndex31, depth31 := position, tokenIndex, depth
 						{
 							position32, tokenIndex32, depth32 := position, tokenIndex, depth
-							{
-								position33, tokenIndex33, depth33 := position, tokenIndex, depth
-								if buffer[position] != rune('\r') {
-									goto l34
-								}
-								position++
-								goto l33
-							l34:
-								position, tokenIndex, depth = position33, tokenIndex33, depth33
-								if buffer[position] != rune('\n') {
-									goto l35
-								}
-								position++
-								goto l33
-							l35:
-								position, tokenIndex, depth = position33, tokenIndex33, depth33
-								if buffer[position] != rune(' ') {
-									goto l36
-								}
-								position++
-								goto l33
-							l36:
-								position, tokenIndex, depth = position33, tokenIndex33, depth33
-								if buffer[position] != rune('\t') {
-									goto l32
-								}
-								position++
+							if !_rules[ruleEOL]() {
+								goto l32
 							}
-						l33:
 							goto l31
 						l32:
 							position, tokenIndex, depth = position32, tokenIndex32, depth32
@@ -802,127 +776,127 @@ func (p *erpelParser) Init() {
 		},
 		/* 5 Comment <- <(_ '#' (!EOL .)*)> */
 		func() bool {
-			position37, tokenIndex37, depth37 := position, tokenIndex, depth
+			position33, tokenIndex33, depth33 := position, tokenIndex, depth
 			{
-				position38 := position
+				position34 := position
 				depth++
 				if !_rules[rule_]() {
-					goto l37
+					goto l33
 				}
 				if buffer[position] != rune('#') {
-					goto l37
+					goto l33
 				}
 				position++
-			l39:
+			l35:
 				{
-					position40, tokenIndex40, depth40 := position, tokenIndex, depth
+					position36, tokenIndex36, depth36 := position, tokenIndex, depth
 					{
-						position41, tokenIndex41, depth41 := position, tokenIndex, depth
+						position37, tokenIndex37, depth37 := position, tokenIndex, depth
 						if !_rules[ruleEOL]() {
-							goto l41
+							goto l37
 						}
-						goto l40
-					l41:
-						position, tokenIndex, depth = position41, tokenIndex41, depth41
+						goto l36
+					l37:
+						position, tokenIndex, depth = position37, tokenIndex37, depth37
 					}
 					if !matchDot() {
-						goto l40
+						goto l36
 					}
-					goto l39
-				l40:
-					position, tokenIndex, depth = position40, tokenIndex40, depth40
+					goto l35
+				l36:
+					position, tokenIndex, depth = position36, tokenIndex36, depth36
 				}
 				depth--
-				add(ruleComment, position38)
+				add(ruleComment, position34)
 			}
 			return true
-		l37:
-			position, tokenIndex, depth = position37, tokenIndex37, depth37
+		l33:
+			position, tokenIndex, depth = position33, tokenIndex33, depth33
 			return false
 		},
 		/* 6 Any <- <!EOL> */
 		nil,
 		/* 7 EOF <- <!.> */
 		func() bool {
-			position43, tokenIndex43, depth43 := position, tokenIndex, depth
+			position39, tokenIndex39, depth39 := position, tokenIndex, depth
 			{
-				position44 := position
+				position40 := position
 				depth++
 				{
-					position45, tokenIndex45, depth45 := position, tokenIndex, depth
+					position41, tokenIndex41, depth41 := position, tokenIndex, depth
 					if !matchDot() {
-						goto l45
+						goto l41
 					}
-					goto l43
-				l45:
-					position, tokenIndex, depth = position45, tokenIndex45, depth45
+					goto l39
+				l41:
+					position, tokenIndex, depth = position41, tokenIndex41, depth41
 				}
 				depth--
-				add(ruleEOF, position44)
+				add(ruleEOF, position40)
 			}
 			return true
-		l43:
-			position, tokenIndex, depth = position43, tokenIndex43, depth43
+		l39:
+			position, tokenIndex, depth = position39, tokenIndex39, depth39
 			return false
 		},
 		/* 8 EOL <- <('\r' / '\n')> */
 		func() bool {
-			position46, tokenIndex46, depth46 := position, tokenIndex, depth
+			position42, tokenIndex42, depth42 := position, tokenIndex, depth
 			{
-				position47 := position
+				position43 := position
 				depth++
 				{
-					position48, tokenIndex48, depth48 := position, tokenIndex, depth
+					position44, tokenIndex44, depth44 := position, tokenIndex, depth
 					if buffer[position] != rune('\r') {
-						goto l49
+						goto l45
 					}
 					position++
-					goto l48
-				l49:
-					position, tokenIndex, depth = position48, tokenIndex48, depth48
+					goto l44
+				l45:
+					position, tokenIndex, depth = position44, tokenIndex44, depth44
 					if buffer[position] != rune('\n') {
-						goto l46
+						goto l42
 					}
 					position++
 				}
-			l48:
+			l44:
 				depth--
-				add(ruleEOL, position47)
+				add(ruleEOL, position43)
 			}
 			return true
-		l46:
-			position, tokenIndex, depth = position46, tokenIndex46, depth46
+		l42:
+			position, tokenIndex, depth = position42, tokenIndex42, depth42
 			return false
 		},
 		/* 9 _ <- <(' ' / '\t')*> */
 		func() bool {
 			{
-				position51 := position
+				position47 := position
 				depth++
-			l52:
+			l48:
 				{
-					position53, tokenIndex53, depth53 := position, tokenIndex, depth
+					position49, tokenIndex49, depth49 := position, tokenIndex, depth
 					{
-						position54, tokenIndex54, depth54 := position, tokenIndex, depth
+						position50, tokenIndex50, depth50 := position, tokenIndex, depth
 						if buffer[position] != rune(' ') {
-							goto l55
+							goto l51
 						}
 						position++
-						goto l54
-					l55:
-						position, tokenIndex, depth = position54, tokenIndex54, depth54
+						goto l50
+					l51:
+						position, tokenIndex, depth = position50, tokenIndex50, depth50
 						if buffer[position] != rune('\t') {
-							goto l53
+							goto l49
 						}
 						position++
 					}
-				l54:
-					goto l52
-				l53:
-					position, tokenIndex, depth = position53, tokenIndex53, depth53
+				l50:
+					goto l48
+				l49:
+					position, tokenIndex, depth = position49, tokenIndex49, depth49
 				}
 				depth--
-				add(rule_, position51)
+				add(rule_, position47)
 			}
 			return true
 		},
