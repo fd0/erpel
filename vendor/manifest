@@ -14,6 +14,13 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/tkrajina/go-reflector/reflector",
+			"repository": "https://github.com/tkrajina/go-reflector",
+			"revision": "fd89736d389b4dfb8e72bf30926a09383f94c6b3",
+			"branch": "master",
+			"path": "/reflector"
+		},
+		{
 			"importpath": "gopkg.in/gcfg.v1",
 			"repository": "https://gopkg.in/gcfg.v1",
 			"revision": "083575c3955c85df16fe9590cceab64d03f5eb6e",
