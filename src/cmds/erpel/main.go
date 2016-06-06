@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"erpel"
+	"erpel/config"
+	"erpel/rules"
 	"fmt"
 	"os"
 	"regexp"
@@ -74,7 +76,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := erpel.LoadConfig(opts.Config)
+	cfg, err := config.ParseFile(opts.Config)
 	if err != nil {
 		Erx(err, 2)
 	}
@@ -82,7 +84,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := erpel.LoadAllRules(cfg)
+	rules, err := rules.LoadAll(cfg.RulesDir, cfg.Aliases)
 	if err != nil {
 		Erx(err, 3)
 	}
@@ -94,8 +96,8 @@ func main() {
 			D("  Rule: %v\n", rule)
 		}
 
-		for _, alias := range cfg.Aliases {
-			D("  Alias %v -> %v\n", alias.Name, alias.Regex)
+		for key, value := range cfg.Aliases {
+			D("  Alias %v -> %v\n", key, value)
 		}
 	}
 

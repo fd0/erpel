@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io/ioutil"
 	"strings"
 
 	"github.com/fd0/probe"
@@ -72,4 +73,14 @@ func Parse(data string) (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+// ParseFile loads config data from a file and parses it.
+func ParseFile(filename string) (Config, error) {
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return Config{}, err
+	}
+
+	return Parse(string(buf))
 }
