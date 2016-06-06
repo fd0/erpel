@@ -63,8 +63,8 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: ` foo = bar
-		# test comment
-		baz= bumppp
+# test comment
+	baz= bumppp
 		`,
 		state: configState{
 			stmts: map[string]string{

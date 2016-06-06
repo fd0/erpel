@@ -18,7 +18,9 @@ type configState struct {
 }
 
 func (c *configState) set(key, value string) {
-	c.stmts[key] = strings.TrimSpace(value)
+	key = strings.TrimSpace(key)
+	value = strings.TrimSpace(value)
+	c.stmts[key] = value
 }
 
 // Config holds all configuration from a config file.
