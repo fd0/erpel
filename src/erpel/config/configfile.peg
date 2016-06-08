@@ -5,15 +5,18 @@ type erpelParser Peg {
 }
 
 # this is the entry point to the grammar
-start <- (line EOL)* line? EOF
+start <- s statements s Section* statements EOF
 
-line <- S (Comment / Section / Statement)? S
+statements <- (line EOL)* line?
 
-Section <- "[" < ( !"]" !EOL . )+ > "]"                    { p.newSection(buffer[begin:end]) }
+line <- s (Comment / Statement)? s
 
-Statement <- Name S '=' S Value                            { p.set(p.name, p.value) }
+Section <- SectionName s "{" statements "}" s              { p.setDefaultSection() }
+SectionName <- < Name >                                    { p.newSection(buffer[begin:end]) }
 
-Name <- < (!'=' !EOL .)+ > { p.name = buffer[begin:end] }
+Statement <- Name s '=' s Value                            { p.set(p.name, p.value) }
+
+Name <- < [a-zA-Z0-9_]+ >                                  { p.name = buffer[begin:end] }
 
 Value <- DoubleQuotedValue / SingleQuotedvalue / RawValue
 
@@ -22,8 +25,13 @@ DoubleQuotedValue <- < '"' ( '\"' / !EOL !'"' . )* '"' >   { p.value = buffer[be
 RawValue <- < ( !EOL . )* >                                { p.value = buffer[begin:end] }
 
 # comment to the end of the line
-Comment <- S '#' (!EOL .)*
+Comment <- s '#' (!EOL .)*
 
 EOF <- !.
 EOL <- [\r\n]
-S <- [ \t]*
+
+# Space
+s <- [ \t]*
+
+# Space with EOL
+S <- [ \t\r\n]*

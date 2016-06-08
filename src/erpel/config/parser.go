@@ -29,6 +29,10 @@ func (c *configState) newSection(name string) {
 	c.currentSection = sec
 }
 
+func (c *configState) setDefaultSection() {
+	c.currentSection = c.sections[""]
+}
+
 func (c *configState) set(key, value string) {
 	key = strings.TrimSpace(key)
 	value = strings.TrimSpace(value)
