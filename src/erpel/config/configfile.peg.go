@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-const end_symbol rune = 1114112
+const endSymbol rune = 1114112
 
 /* The rule types inferred from the grammar are below. */
 type pegRule uint8
@@ -26,7 +26,7 @@ const (
 	ruleComment
 	ruleEOF
 	ruleEOL
-	rule_
+	ruleS
 	rulePegText
 	ruleAction0
 	ruleAction1
@@ -35,9 +35,9 @@ const (
 	ruleAction4
 	ruleAction5
 
-	rulePre_
-	rule_In_
-	rule_Suf
+	rulePre
+	ruleIn
+	ruleSuf
 )
 
 var rul3s = [...]string{
@@ -54,7 +54,7 @@ var rul3s = [...]string{
 	"Comment",
 	"EOF",
 	"EOL",
-	"_",
+	"S",
 	"PegText",
 	"Action0",
 	"Action1",
@@ -98,8 +98,8 @@ func (node *node32) print(depth int, buffer string) {
 	}
 }
 
-func (ast *node32) Print(buffer string) {
-	ast.print(0, buffer)
+func (node *node32) Print(buffer string) {
+	node.print(0, buffer)
 }
 
 type element struct {
@@ -207,7 +207,7 @@ func (t *tokens32) PreOrder() (<-chan state32, [][]token32) {
 	s, ordered := make(chan state32, 6), t.Order()
 	go func() {
 		var states [8]state32
-		for i, _ := range states {
+		for i := range states {
 			states[i].depths = make([]int32, len(ordered))
 		}
 		depths, state, depth := make([]int32, len(ordered)), 0, 1
@@ -229,14 +229,14 @@ func (t *tokens32) PreOrder() (<-chan state32, [][]token32) {
 					if c, j := ordered[depth][i-1], depths[depth-1]; a.isParentOf(c) &&
 						(j < 2 || !ordered[depth-1][j-2].isParentOf(c)) {
 						if c.end != b.begin {
-							write(token32{pegRule: rule_In_, begin: c.end, end: b.begin}, true)
+							write(token32{pegRule: ruleIn, begin: c.end, end: b.begin}, true)
 						}
 						break
 					}
 				}
 
 				if a.begin < b.begin {
-					write(token32{pegRule: rulePre_, begin: a.begin, end: b.begin}, true)
+					write(token32{pegRule: rulePre, begin: a.begin, end: b.begin}, true)
 				}
 				break
 			}
@@ -257,7 +257,7 @@ func (t *tokens32) PreOrder() (<-chan state32, [][]token32) {
 					b = c
 					continue depthFirstSearch
 				} else if parent && b.end != a.end {
-					write(token32{pegRule: rule_Suf, begin: b.end, end: a.end}, true)
+					write(token32{pegRule: ruleSuf, begin: b.end, end: a.end}, true)
 				}
 
 				depth--
@@ -346,7 +346,7 @@ func (t *tokens32) Error() []token32 {
 	ordered := t.Order()
 	length := len(ordered)
 	tokens, length := make([]token32, length), length-1
-	for i, _ := range tokens {
+	for i := range tokens {
 		o := ordered[length-i]
 		if len(o) > 1 {
 			tokens[i] = o[len(o)-2].getToken32()
@@ -486,8 +486,8 @@ func (p *erpelParser) Execute() {
 
 func (p *erpelParser) Init() {
 	p.buffer = []rune(p.Buffer)
-	if len(p.buffer) == 0 || p.buffer[len(p.buffer)-1] != end_symbol {
-		p.buffer = append(p.buffer, end_symbol)
+	if len(p.buffer) == 0 || p.buffer[len(p.buffer)-1] != endSymbol {
+		p.buffer = append(p.buffer, endSymbol)
 	}
 
 	var tree tokenTree = &tokens32{tree: make([]token32, math.MaxInt16)}
@@ -524,7 +524,7 @@ func (p *erpelParser) Init() {
 	}
 
 	matchDot := func() bool {
-		if buffer[position] != end_symbol {
+		if buffer[position] != endSymbol {
 			position++
 			return true
 		}
@@ -581,13 +581,13 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position0, tokenIndex0, depth0
 			return false
 		},
-		/* 1 line <- <(_ (Comment / Section / Statement)? _)> */
+		/* 1 line <- <(S (Comment / Section / Statement)? S)> */
 		func() bool {
 			position6, tokenIndex6, depth6 := position, tokenIndex, depth
 			{
 				position7 := position
 				depth++
-				if !_rules[rule_]() {
+				if !_rules[ruleS]() {
 					goto l6
 				}
 				{
@@ -616,7 +616,7 @@ func (p *erpelParser) Init() {
 					position, tokenIndex, depth = position8, tokenIndex8, depth8
 				}
 			l9:
-				if !_rules[rule_]() {
+				if !_rules[ruleS]() {
 					goto l6
 				}
 				depth--
@@ -709,7 +709,7 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position13, tokenIndex13, depth13
 			return false
 		},
-		/* 3 Statement <- <(Name _ '=' _ Value Action1)> */
+		/* 3 Statement <- <(Name S '=' S Value Action1)> */
 		func() bool {
 			position22, tokenIndex22, depth22 := position, tokenIndex, depth
 			{
@@ -718,14 +718,14 @@ func (p *erpelParser) Init() {
 				if !_rules[ruleName]() {
 					goto l22
 				}
-				if !_rules[rule_]() {
+				if !_rules[ruleS]() {
 					goto l22
 				}
 				if buffer[position] != rune('=') {
 					goto l22
 				}
 				position++
-				if !_rules[rule_]() {
+				if !_rules[ruleS]() {
 					goto l22
 				}
 				if !_rules[ruleValue]() {
@@ -1033,13 +1033,13 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position56, tokenIndex56, depth56
 			return false
 		},
-		/* 9 Comment <- <(_ '#' (!EOL .)*)> */
+		/* 9 Comment <- <(S '#' (!EOL .)*)> */
 		func() bool {
 			position62, tokenIndex62, depth62 := position, tokenIndex, depth
 			{
 				position63 := position
 				depth++
-				if !_rules[rule_]() {
+				if !_rules[ruleS]() {
 					goto l62
 				}
 				if buffer[position] != rune('#') {
@@ -1125,7 +1125,7 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position70, tokenIndex70, depth70
 			return false
 		},
-		/* 12 _ <- <(' ' / '\t')*> */
+		/* 12 S <- <(' ' / '\t')*> */
 		func() bool {
 			{
 				position75 := position
@@ -1153,7 +1153,7 @@ func (p *erpelParser) Init() {
 					position, tokenIndex, depth = position77, tokenIndex77, depth77
 				}
 				depth--
-				add(rule_, position75)
+				add(ruleS, position75)
 			}
 			return true
 		},
