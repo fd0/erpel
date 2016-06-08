@@ -14,7 +14,7 @@ import (
 // Config holds all information parsed from a configuration file.
 type Config struct {
 	RulesDir string `name:"rules_dir"`
-	Prefix   string
+	Prefix   string `name:"global_prefix"`
 
 	Aliases map[string]string
 }
