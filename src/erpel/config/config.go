@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -16,7 +17,7 @@ type Config struct {
 	RulesDir string `name:"rules_dir"`
 	Prefix   string `name:"global_prefix"`
 
-	Aliases map[string]string
+	Aliases map[string]*regexp.Regexp
 }
 
 // fieldForName returns the field matching the name, either directly (via
@@ -102,6 +103,25 @@ func applyMap(data map[string]string, m map[string]string) error {
 	return nil
 }
 
+// applyRegexpsMap parses all regexps and stores them in the map.
+func applyRegexpsMap(data map[string]string, m map[string]*regexp.Regexp) error {
+	for key, value := range data {
+		value, err := unquoteString(value)
+		if err != nil {
+			return err
+		}
+
+		r, err := regexp.Compile(value)
+		if err != nil {
+			return err
+		}
+
+		m[key] = r
+	}
+
+	return nil
+}
+
 // parseState returns a Config struct from a state.
 func parseState(state configState) (Config, error) {
 	cfg := Config{}
@@ -112,8 +132,8 @@ func parseState(state configState) (Config, error) {
 		case "":
 			err = apply(data, "name", &cfg)
 		case "aliases":
-			cfg.Aliases = make(map[string]string)
-			err = applyMap(data, cfg.Aliases)
+			cfg.Aliases = make(map[string]*regexp.Regexp)
+			err = applyRegexpsMap(data, cfg.Aliases)
 		default:
 			err = fmt.Errorf("unknown section %v", name)
 		}

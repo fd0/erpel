@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"testing"
 )
 
@@ -29,10 +30,10 @@ IPv6 = "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"
 			RulesDir: "/etc/erpel/rules.d",
 			Prefix:   `^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+`,
 
-			Aliases: map[string]string{
-				"IP":   "(IPv4|IPv6)",
-				"IPv4": `\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}`,
-				"IPv6": "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}",
+			Aliases: map[string]*regexp.Regexp{
+				"IP":   regexp.MustCompile("(IPv4|IPv6)"),
+				"IPv4": regexp.MustCompile(`\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}`),
+				"IPv6": regexp.MustCompile("([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"),
 			},
 		},
 	},
