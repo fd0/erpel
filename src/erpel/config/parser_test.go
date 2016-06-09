@@ -171,6 +171,16 @@ var testConfigs = []struct {
 		},
 	},
 	{
+		cfg: `Foo-baR_ = "xxy"  `,
+		state: configState{
+			sections: map[string]section{
+				"": section{
+					"Foo-baR_": `"xxy"`,
+				},
+			},
+		},
+	},
+	{
 		cfg: `Foo_baR = "xxy"  `,
 		state: configState{
 			sections: map[string]section{

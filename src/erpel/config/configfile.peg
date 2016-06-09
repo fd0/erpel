@@ -16,7 +16,7 @@ SectionName <- < Name >                                    { p.newSection(buffer
 
 Statement <- Name s '=' s Value                            { p.set(p.name, p.value) }
 
-Name <- < [a-zA-Z0-9_]+ >                                  { p.name = buffer[begin:end] }
+Name <- < [a-zA-Z0-9-_]+ >                                 { p.name = buffer[begin:end] }
 
 Value <- DoubleQuotedValue / SingleQuotedvalue / RawValue
 
@@ -32,6 +32,3 @@ EOL <- [\r\n]
 
 # Space
 s <- [ \t]*
-
-# Space with EOL
-S <- [ \t\r\n]*
