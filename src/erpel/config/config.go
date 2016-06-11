@@ -89,15 +89,15 @@ func apply(data map[string]string, tag string, target interface{}) error {
 	return nil
 }
 
-// applyMap unquotes the strings and applies them to the map.
-func applyMap(data map[string]string, m map[string]string) error {
-	for key, value := range data {
-		value, err := unquoteString(value)
+// unquoteMap unquotes the strings in the map.
+func unquoteMap(data map[string]string) error {
+	for key := range data {
+		value, err := unquoteString(data[key])
 		if err != nil {
 			return err
 		}
 
-		m[key] = value
+		data[key] = value
 	}
 
 	return nil
@@ -133,7 +133,10 @@ func parseState(state configState) (Config, error) {
 		case "":
 			err = apply(data, "name", &cfg)
 		case "aliases":
-			cfg.Aliases, err = parseAliases(data)
+			err = unquoteMap(data)
+			if err == nil {
+				cfg.Aliases, err = parseAliases(data)
+			}
 		default:
 			err = fmt.Errorf("unknown section %v", name)
 		}
