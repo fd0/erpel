@@ -2,6 +2,7 @@ package rules
 
 import (
 	"bufio"
+	"erpel/config"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,7 +12,7 @@ import (
 )
 
 // LoadAll loads all rules from files in dir.
-func LoadAll(dir string, aliases map[string]string) (rules []*regexp.Regexp, err error) {
+func LoadAll(dir string, aliases map[string]config.Alias) (rules []*regexp.Regexp, err error) {
 	pattern := filepath.Join(dir, "*")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
@@ -31,7 +32,7 @@ func LoadAll(dir string, aliases map[string]string) (rules []*regexp.Regexp, err
 }
 
 // Load unmarshals a rules file.
-func Load(filename string, aliases map[string]string) (rules []*regexp.Regexp, err error) {
+func Load(filename string, aliases map[string]config.Alias) (rules []*regexp.Regexp, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, probe.Trace(err, filename)
@@ -62,8 +63,8 @@ func Load(filename string, aliases map[string]string) (rules []*regexp.Regexp, e
 		}
 
 		// replace aliases
-		for name, replacement := range aliases {
-			line = strings.Replace(line, name, replacement, -1)
+		for name, alias := range aliases {
+			line = strings.Replace(line, "{{"+name+"}}", alias.Value, -1)
 		}
 
 		r, err := regexp.Compile(line)
