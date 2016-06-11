@@ -62,10 +62,7 @@ func Load(filename string, aliases map[string]config.Alias) (rules []*regexp.Reg
 			line = "^" + line
 		}
 
-		// replace aliases
-		for name, alias := range aliases {
-			line = strings.Replace(line, "{{"+name+"}}", alias.Value, -1)
-		}
+		line = config.ApplyAliases(aliases, line)
 
 		r, err := regexp.Compile(line)
 		if err != nil {
