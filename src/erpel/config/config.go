@@ -17,7 +17,7 @@ type Config struct {
 	RulesDir string `name:"rules_dir"`
 	Prefix   string `name:"global_prefix"`
 
-	Aliases map[string]*regexp.Regexp
+	Aliases []Alias
 }
 
 // fieldForName returns the field matching the name, either directly (via
@@ -103,23 +103,24 @@ func applyMap(data map[string]string, m map[string]string) error {
 	return nil
 }
 
-// applyRegexpsMap parses all regexps and stores them in the map.
-func applyRegexpsMap(data map[string]string, m map[string]*regexp.Regexp) error {
+// compileRegexp parses all regexps and stores them in the map.
+func compileRegexp(data map[string]string) (map[string]*regexp.Regexp, error) {
+	m := make(map[string]*regexp.Regexp, len(data))
 	for key, value := range data {
 		value, err := unquoteString(value)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		r, err := regexp.Compile(value)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		m[key] = r
 	}
 
-	return nil
+	return m, nil
 }
 
 // parseState returns a Config struct from a state.
@@ -132,8 +133,7 @@ func parseState(state configState) (Config, error) {
 		case "":
 			err = apply(data, "name", &cfg)
 		case "aliases":
-			cfg.Aliases = make(map[string]*regexp.Regexp)
-			err = applyRegexpsMap(data, cfg.Aliases)
+			cfg.Aliases, err = parseAliases(data)
 		default:
 			err = fmt.Errorf("unknown section %v", name)
 		}

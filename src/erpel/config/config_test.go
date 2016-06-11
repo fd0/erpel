@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"testing"
 )
 
@@ -21,7 +20,7 @@ rules_dir = "/etc/erpel/rules.d"
 prefix = ^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+
 
 aliases{
-IP = "(IPv4|IPv6)"
+IP = "({{IPv4}}|{{IPv6}})"
 IPv4 = '\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}'
 IPv6 = "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"
 }
@@ -30,10 +29,10 @@ IPv6 = "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"
 			RulesDir: "/etc/erpel/rules.d",
 			Prefix:   `^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+`,
 
-			Aliases: map[string]*regexp.Regexp{
-				"IP":   regexp.MustCompile("(IPv4|IPv6)"),
-				"IPv4": regexp.MustCompile(`\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}`),
-				"IPv6": regexp.MustCompile("([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"),
+			Aliases: []Alias{
+				NewAlias("IP", `(\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
+				NewAlias("IPv4", `\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}`),
+				NewAlias("IPv6", "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"),
 			},
 		},
 	},
