@@ -51,49 +51,49 @@ func TestAliasDeps(t *testing.T) {
 }
 
 var aliasTests = []struct {
-	before []Alias
-	after  []Alias
+	before map[string]Alias
+	after  map[string]Alias
 }{
+	// {
+	// 	before: map[string]Alias{
+	// 		"foo":  NewAlias("foo", "bar"),
+	// 		"bar":  NewAlias("bar", "baz"),
+	// 		"test": NewAlias("test", "test"),
+	// 	},
+	// 	after: map[string]Alias{
+	// 		"foo":  NewAlias("foo", "bar"),
+	// 		"bar":  NewAlias("bar", "baz"),
+	// 		"test": NewAlias("test", "test"),
+	// 	},
+	// },
 	{
-		before: []Alias{
-			NewAlias("foo", "bar"),
-			NewAlias("bar", "baz"),
-			NewAlias("test", "test"),
+		before: map[string]Alias{
+			"foo":  NewAlias("foo", "bar"),
+			"bar":  NewAlias("bar", "fo{{foo}}obar{{foo}}"),
+			"baz":  NewAlias("baz", "quux"),
+			"test": NewAlias("test", "resolv{{bar}}-{{baz}}"),
 		},
-		after: []Alias{
-			NewAlias("foo", "bar"),
-			NewAlias("bar", "baz"),
-			NewAlias("test", "test"),
+		after: map[string]Alias{
+			"foo":  NewAlias("foo", "bar"),
+			"bar":  NewAlias("bar", "fobarobarbar"),
+			"baz":  NewAlias("baz", "quux"),
+			"test": NewAlias("test", "resolvfobarobarbar-quux"),
 		},
 	},
-	{
-		before: []Alias{
-			NewAlias("foo", "bar"),
-			NewAlias("bar", "fo{{foo}}obar{{foo}}"),
-			NewAlias("baz", "quux"),
-			NewAlias("test", "resolv{{bar}}-{{baz}}"),
-		},
-		after: []Alias{
-			NewAlias("foo", "bar"),
-			NewAlias("bar", "fobarobarbar"),
-			NewAlias("baz", "quux"),
-			NewAlias("test", "resolvfobarobarbar-quux"),
-		},
-	},
-	{
-		before: []Alias{
-			NewAlias("IP", "({{IPv4}}|{{IPv6}})"),
-			NewAlias("IPv4", `({{octet}}\.){3}\.{{octet}}`),
-			NewAlias("octet", `\d{1,3}`),
-			NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
-		},
-		after: []Alias{
-			NewAlias("IP", `((\d{1,3}\.){3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
-			NewAlias("IPv4", `(\d{1,3}\.){3}\.\d{1,3}`),
-			NewAlias("octet", `\d{1,3}`),
-			NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
-		},
-	},
+	// {
+	// 	before: map[string]Alias{
+	// 		"IP":    NewAlias("IP", "({{IPv4}}|{{IPv6}})"),
+	// 		"IPv4":  NewAlias("IPv4", `({{octet}}\.){3}\.{{octet}}`),
+	// 		"octet": NewAlias("octet", `\d{1,3}`),
+	// 		"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
+	// 	},
+	// 	after: map[string]Alias{
+	// 		"IP":    NewAlias("IP", `((\d{1,3}\.){3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
+	// 		"IPv4":  NewAlias("IPv4", `(\d{1,3}\.){3}\.\d{1,3}`),
+	// 		"octet": NewAlias("octet", `\d{1,3}`),
+	// 		"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
+	// 	},
+	// },
 }
 
 func TestResolveAliases(t *testing.T) {
@@ -112,29 +112,29 @@ func TestResolveAliases(t *testing.T) {
 	}
 }
 
-var invalidAliasTests = [][]Alias{
+var invalidAliasTests = []map[string]Alias{
 	{
-		NewAlias("foo", "test {{foo}}"),
+		"foo": NewAlias("foo", "test {{foo}}"),
 	},
 	{
-		NewAlias("bar", "{{foo}}"),
-		NewAlias("foo", "test {{bar}}"),
+		"bar": NewAlias("bar", "{{foo}}"),
+		"foo": NewAlias("foo", "test {{bar}}"),
 	},
 	{
-		NewAlias("x", "y"),
-		NewAlias("bar", "{{foo}}"),
-		NewAlias("foo", "test {{bar}}"),
+		"x":   NewAlias("x", "y"),
+		"bar": NewAlias("bar", "{{foo}}"),
+		"foo": NewAlias("foo", "test {{bar}}"),
 	},
 	{
-		NewAlias("foo1", "{{foo2}}"),
-		NewAlias("foo2", "{{foo3}}"),
-		NewAlias("foo3", "{{foo4}}"),
-		NewAlias("foo4", "{{foo1}}"),
+		"foo1": NewAlias("foo1", "{{foo2}}"),
+		"foo2": NewAlias("foo2", "{{foo3}}"),
+		"foo3": NewAlias("foo3", "{{foo4}}"),
+		"foo4": NewAlias("foo4", "{{foo1}}"),
 	},
 	{
-		NewAlias("bar", "{{foo}}"),
-		NewAlias("foo", "test {{bar}}"),
-		NewAlias("bar", "{{xyz}}"),
+		"bar": NewAlias("bar", "{{foo}}"),
+		"foo": NewAlias("foo", "test {{bar}}"),
+		"baz": NewAlias("bar", "{{xyz}}"),
 	},
 }
 

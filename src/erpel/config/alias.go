@@ -21,13 +21,18 @@ func NewAlias(name, value string) Alias {
 }
 
 // parseAliases parses all aliases in the map and returns the list.
-func parseAliases(data map[string]string) ([]Alias, error) {
-	list := make([]Alias, 0, len(data))
+func parseAliases(data map[string]string) (map[string]Alias, error) {
+	m := make(map[string]Alias, len(data))
 	for name, value := range data {
-		list = append(list, NewAlias(name, value))
+		m[name] = NewAlias(name, value)
 	}
 
-	return list, nil
+	err := resolveAliases(m)
+	if err != nil {
+		return nil, err
+	}
+
+	return m, nil
 }
 
 var aliasName = regexp.MustCompile("{{([a-zA-Z0-9_-]+)}}")
@@ -110,21 +115,27 @@ nextNode:
 }
 
 // resolveAliases replaces {{foo}} in the alias strings with the value of foo.
-func resolveAliases(aliases []Alias) error {
+func resolveAliases(aliases map[string]Alias) error {
+
+	// fix one ordering for the aliases
+	list := make([]Alias, 0, len(aliases))
+	for _, alias := range aliases {
+		list = append(list, alias)
+	}
 
 	// index resolves an alias name to an index
-	index := make(map[string]int, len(aliases))
-	for i, alias := range aliases {
+	index := make(map[string]int, len(list))
+	for i, alias := range list {
 		index[alias.Name] = i
 	}
 
 	// graph holds all dependencies
-	graph := make([][]bool, len(aliases))
-	for i := range aliases {
-		graph[i] = make([]bool, len(aliases))
+	graph := make([][]bool, len(list))
+	for i := range list {
+		graph[i] = make([]bool, len(list))
 	}
 
-	for i, alias := range aliases {
+	for i, alias := range list {
 		for d := range alias.deps() {
 			j, ok := index[d]
 			if !ok {
@@ -141,20 +152,20 @@ func resolveAliases(aliases []Alias) error {
 	}
 
 	for _, i := range sorted {
-		alias := aliases[i]
+		alias := list[i]
 
-		value := aliases[i].Value
+		value := alias.Value
 		for name := range alias.deps() {
-			idx, ok := index[name]
+			a, ok := aliases[name]
 			if !ok {
 				return probe.Trace(fmt.Errorf("dependency alias %v not found", name))
 			}
 
-			a := aliases[idx]
 			value = strings.Replace(value, "{{"+name+"}}", a.Value, -1)
 		}
 
-		aliases[i].Value = value
+		alias.Value = value
+		aliases[alias.Name] = alias
 	}
 
 	return nil

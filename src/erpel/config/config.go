@@ -17,7 +17,7 @@ type Config struct {
 	RulesDir string `name:"rules_dir"`
 	Prefix   string `name:"global_prefix"`
 
-	Aliases []Alias
+	Aliases map[string]Alias
 }
 
 // fieldForName returns the field matching the name, either directly (via
