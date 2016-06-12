@@ -380,10 +380,10 @@ func TestParseConfig(t *testing.T) {
 }
 
 var testInvalidConfig = []string{
-	``,
 	`afoo=  `,
 	`a=b`,
 	` a = b`,
+	" a = 'foo\narb'",
 }
 
 func TestParseInvalidConfig(t *testing.T) {

@@ -56,7 +56,6 @@ func parseConfig(data string) (configState, error) {
 	c.Init()
 	err := c.Parse()
 	if err != nil {
-		c.PrintSyntaxTree()
 		return configState{}, probe.Trace(err, data)
 	}
 	c.Execute()
