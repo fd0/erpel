@@ -21,10 +21,10 @@ const (
 	ruleSectionName
 	ruleStatement
 	ruleName
-	ruleValue
-	ruleSingleQuotedvalue
-	ruleDoubleQuotedValue
-	ruleRawValue
+	ruleString
+	ruleSingleQuotedString
+	ruleDoubleQuotedString
+	ruleRawString
 	ruleComment
 	ruleEOF
 	ruleEOL
@@ -52,10 +52,10 @@ var rul3s = [...]string{
 	"SectionName",
 	"Statement",
 	"Name",
-	"Value",
-	"SingleQuotedvalue",
-	"DoubleQuotedValue",
-	"RawValue",
+	"String",
+	"SingleQuotedString",
+	"DoubleQuotedString",
+	"RawString",
 	"Comment",
 	"EOF",
 	"EOL",
@@ -732,7 +732,7 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position18, tokenIndex18, depth18
 			return false
 		},
-		/* 5 Statement <- <(Name s '=' s Value Action2)> */
+		/* 5 Statement <- <(Name s '=' s String Action2)> */
 		func() bool {
 			position21, tokenIndex21, depth21 := position, tokenIndex, depth
 			{
@@ -751,7 +751,7 @@ func (p *erpelParser) Init() {
 				if !_rules[rules]() {
 					goto l21
 				}
-				if !_rules[ruleValue]() {
+				if !_rules[ruleString]() {
 					goto l21
 				}
 				if !_rules[ruleAction2]() {
@@ -867,7 +867,7 @@ func (p *erpelParser) Init() {
 			position, tokenIndex, depth = position23, tokenIndex23, depth23
 			return false
 		},
-		/* 7 Value <- <(DoubleQuotedValue / SingleQuotedvalue / RawValue)> */
+		/* 7 String <- <(DoubleQuotedString / SingleQuotedString / RawString)> */
 		func() bool {
 			position38, tokenIndex38, depth38 := position, tokenIndex, depth
 			{
@@ -875,32 +875,32 @@ func (p *erpelParser) Init() {
 				depth++
 				{
 					position40, tokenIndex40, depth40 := position, tokenIndex, depth
-					if !_rules[ruleDoubleQuotedValue]() {
+					if !_rules[ruleDoubleQuotedString]() {
 						goto l41
 					}
 					goto l40
 				l41:
 					position, tokenIndex, depth = position40, tokenIndex40, depth40
-					if !_rules[ruleSingleQuotedvalue]() {
+					if !_rules[ruleSingleQuotedString]() {
 						goto l42
 					}
 					goto l40
 				l42:
 					position, tokenIndex, depth = position40, tokenIndex40, depth40
-					if !_rules[ruleRawValue]() {
+					if !_rules[ruleRawString]() {
 						goto l38
 					}
 				}
 			l40:
 				depth--
-				add(ruleValue, position39)
+				add(ruleString, position39)
 			}
 			return true
 		l38:
 			position, tokenIndex, depth = position38, tokenIndex38, depth38
 			return false
 		},
-		/* 8 SingleQuotedvalue <- <(<('\'' ('\'' / (!EOL !'\'' .))* '\'')> Action4)> */
+		/* 8 SingleQuotedString <- <(<('\'' (('\\' '\'') / (!EOL !'\'' .))* '\'')> Action4)> */
 		func() bool {
 			position43, tokenIndex43, depth43 := position, tokenIndex, depth
 			{
@@ -918,6 +918,10 @@ func (p *erpelParser) Init() {
 						position47, tokenIndex47, depth47 := position, tokenIndex, depth
 						{
 							position48, tokenIndex48, depth48 := position, tokenIndex, depth
+							if buffer[position] != rune('\\') {
+								goto l49
+							}
+							position++
 							if buffer[position] != rune('\'') {
 								goto l49
 							}
@@ -964,14 +968,14 @@ func (p *erpelParser) Init() {
 					goto l43
 				}
 				depth--
-				add(ruleSingleQuotedvalue, position44)
+				add(ruleSingleQuotedString, position44)
 			}
 			return true
 		l43:
 			position, tokenIndex, depth = position43, tokenIndex43, depth43
 			return false
 		},
-		/* 9 DoubleQuotedValue <- <(<('"' ('"' / (!EOL !'"' .))* '"')> Action5)> */
+		/* 9 DoubleQuotedString <- <(<('"' (('\\' '"') / (!EOL !'"' .))* '"')> Action5)> */
 		func() bool {
 			position52, tokenIndex52, depth52 := position, tokenIndex, depth
 			{
@@ -989,6 +993,10 @@ func (p *erpelParser) Init() {
 						position56, tokenIndex56, depth56 := position, tokenIndex, depth
 						{
 							position57, tokenIndex57, depth57 := position, tokenIndex, depth
+							if buffer[position] != rune('\\') {
+								goto l58
+							}
+							position++
 							if buffer[position] != rune('"') {
 								goto l58
 							}
@@ -1035,14 +1043,14 @@ func (p *erpelParser) Init() {
 					goto l52
 				}
 				depth--
-				add(ruleDoubleQuotedValue, position53)
+				add(ruleDoubleQuotedString, position53)
 			}
 			return true
 		l52:
 			position, tokenIndex, depth = position52, tokenIndex52, depth52
 			return false
 		},
-		/* 10 RawValue <- <(<(!EOL .)*> Action6)> */
+		/* 10 RawString <- <(<('`' (!'`' .)* '`')> Action6)> */
 		func() bool {
 			position61, tokenIndex61, depth61 := position, tokenIndex, depth
 			{
@@ -1051,14 +1059,19 @@ func (p *erpelParser) Init() {
 				{
 					position63 := position
 					depth++
+					if buffer[position] != rune('`') {
+						goto l61
+					}
+					position++
 				l64:
 					{
 						position65, tokenIndex65, depth65 := position, tokenIndex, depth
 						{
 							position66, tokenIndex66, depth66 := position, tokenIndex, depth
-							if !_rules[ruleEOL]() {
+							if buffer[position] != rune('`') {
 								goto l66
 							}
+							position++
 							goto l65
 						l66:
 							position, tokenIndex, depth = position66, tokenIndex66, depth66
@@ -1070,6 +1083,10 @@ func (p *erpelParser) Init() {
 					l65:
 						position, tokenIndex, depth = position65, tokenIndex65, depth65
 					}
+					if buffer[position] != rune('`') {
+						goto l61
+					}
+					position++
 					depth--
 					add(rulePegText, position63)
 				}
@@ -1077,7 +1094,7 @@ func (p *erpelParser) Init() {
 					goto l61
 				}
 				depth--
-				add(ruleRawValue, position62)
+				add(ruleRawString, position62)
 			}
 			return true
 		l61:

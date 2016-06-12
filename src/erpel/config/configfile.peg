@@ -14,15 +14,15 @@ line <- s (Comment / Statement)? s
 Section <- SectionName s "{" statements "}" s              { p.setDefaultSection() }
 SectionName <- < Name >                                    { p.newSection(buffer[begin:end]) }
 
-Statement <- Name s '=' s Value                            { p.set(p.name, p.value) }
+Statement <- Name s '=' s String                           { p.set(p.name, p.value) }
 
 Name <- < [a-zA-Z0-9-_]+ >                                 { p.name = buffer[begin:end] }
 
-Value <- DoubleQuotedValue / SingleQuotedvalue / RawValue
+String <- DoubleQuotedString / SingleQuotedString / RawString
 
-SingleQuotedvalue <- < "'" ( "\'" / !EOL !"'" . )* "'" >   { p.value = buffer[begin:end] }
-DoubleQuotedValue <- < '"' ( '\"' / !EOL !'"' . )* '"' >   { p.value = buffer[begin:end] }
-RawValue <- < ( !EOL . )* >                                { p.value = buffer[begin:end] }
+SingleQuotedString <- < "'" ( "\\'" / !EOL !"'" . )* "'" > { p.value = buffer[begin:end] }
+DoubleQuotedString <- < '"' ( '\\"' / !EOL !'"' . )* '"' > { p.value = buffer[begin:end] }
+RawString <- < "`" ( !"`" . )* "`" >                       { p.value = buffer[begin:end] }
 
 # comment to the end of the line
 Comment <- s '#' (!EOL .)*

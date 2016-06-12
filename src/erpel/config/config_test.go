@@ -17,7 +17,7 @@ var testConfigFiles = []struct {
 rules_dir = "/etc/erpel/rules.d"
 
 # prefix must match at the beginning of each line
-prefix = ^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+
+prefix = '^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+'
 
 aliases{
 IP = "({{IPv4}}|{{IPv6}})"
