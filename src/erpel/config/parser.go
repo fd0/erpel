@@ -63,8 +63,8 @@ func parseConfig(data string) (configState, error) {
 	return c.configState, nil
 }
 
-// Parse parses the data as an erpel config file.
-func Parse(data string) (Config, error) {
+// ParseConfig parses the data as an erpel config file.
+func ParseConfig(data string) (Config, error) {
 	state, err := parseConfig(data)
 	if err != nil {
 		return Config{}, probe.Trace(err)
@@ -78,12 +78,12 @@ func Parse(data string) (Config, error) {
 	return cfg, nil
 }
 
-// ParseFile loads config data from a file and parses it.
-func ParseFile(filename string) (Config, error) {
+// ParseConfigFile loads config data from a file and parses it.
+func ParseConfigFile(filename string) (Config, error) {
 	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return Config{}, err
 	}
 
-	return Parse(string(buf))
+	return ParseConfig(string(buf))
 }

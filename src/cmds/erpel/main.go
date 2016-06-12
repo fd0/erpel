@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"erpel"
 	"erpel/config"
-	"erpel/rules"
 	"fmt"
 	"os"
 	"regexp"
@@ -87,7 +86,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := config.ParseFile(opts.Config)
+	cfg, err := config.ParseConfigFile(opts.Config)
 	if err != nil {
 		Erx(err, 2)
 	}
@@ -95,7 +94,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := rules.LoadAll(cfg.RulesDir, cfg.Aliases)
+	rules, err := config.LoadAllRules(cfg.RulesDir, cfg.Aliases)
 	if err != nil {
 		Erx(err, 3)
 	}

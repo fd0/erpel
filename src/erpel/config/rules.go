@@ -1,8 +1,7 @@
-package rules
+package config
 
 import (
 	"bufio"
-	"erpel/config"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -11,8 +10,8 @@ import (
 	"github.com/fd0/probe"
 )
 
-// LoadAll loads all rules from files in dir.
-func LoadAll(dir string, aliases map[string]config.Alias) (rules []*regexp.Regexp, err error) {
+// LoadAllRules loads all rules from files in dir.
+func LoadAllRules(dir string, aliases map[string]Alias) (rules []*regexp.Regexp, err error) {
 	pattern := filepath.Join(dir, "*")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
@@ -20,7 +19,7 @@ func LoadAll(dir string, aliases map[string]config.Alias) (rules []*regexp.Regex
 	}
 
 	for _, file := range matches {
-		r, err := Load(file, aliases)
+		r, err := LoadRules(file, aliases)
 		if err != nil {
 			return nil, probe.Trace(err, file)
 		}
@@ -31,8 +30,8 @@ func LoadAll(dir string, aliases map[string]config.Alias) (rules []*regexp.Regex
 	return rules, nil
 }
 
-// Load unmarshals a rules file.
-func Load(filename string, aliases map[string]config.Alias) (rules []*regexp.Regexp, err error) {
+// LoadRules unmarshals a rules file.
+func LoadRules(filename string, aliases map[string]Alias) (rules []*regexp.Regexp, err error) {
 	f, err := os.Open(filename)
 	if err != nil {
 		return nil, probe.Trace(err, filename)
@@ -62,7 +61,7 @@ func Load(filename string, aliases map[string]config.Alias) (rules []*regexp.Reg
 			line = "^" + line
 		}
 
-		line = config.ApplyAliases(aliases, line)
+		line = ApplyAliases(aliases, line)
 
 		r, err := regexp.Compile(line)
 		if err != nil {

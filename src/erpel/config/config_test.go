@@ -40,7 +40,7 @@ IPv6 = "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"
 
 func TestParse(t *testing.T) {
 	for i, test := range testConfigFiles {
-		cfg, err := Parse(test.data)
+		cfg, err := ParseConfig(test.data)
 		if err != nil {
 			t.Errorf("test %v: parse failed: %v", i, err)
 			continue
@@ -111,7 +111,7 @@ func TestSampleConfig(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = Parse(string(buf))
+	_, err = ParseConfig(string(buf))
 	if err != nil {
 		t.Fatalf("parsing sample config failed: %v", err)
 	}
