@@ -8,16 +8,22 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/jessevdk/go-flags"
 )
+
+var version = "compiled manually"
+var compiledAt = "unknown time"
 
 var opts = &struct {
 	Verbose  bool     `short:"v" long:"verbose" description:"be verbose"`
 	Debug    bool     `          long:"debug" description:"turn on debugging"`
 	Config   string   `short:"c" long:"config" env:"ERPEL_CONFIG" default:"/etc/erpel/erpel.conf" description:"configuration file"`
 	Logfiles []string `short:"l" long:"logfile" description:"logfile to process"`
+
+	Version bool `short:"V" long:"version" description:"print version information"`
 }{}
 
 // V prints the message when verbose is active.
@@ -70,6 +76,11 @@ func main() {
 		os.Exit(0)
 	}
 	Erx(err, 1)
+
+	if opts.Version {
+		fmt.Printf("erpel version %v, compiled at %v using %v\n", version, compiledAt, runtime.Version())
+		return
+	}
 
 	if len(opts.Logfiles) == 0 {
 		E("no logfile specified, use --logfile\n")
