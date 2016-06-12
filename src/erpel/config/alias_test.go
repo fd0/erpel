@@ -54,18 +54,18 @@ var aliasTests = []struct {
 	before map[string]Alias
 	after  map[string]Alias
 }{
-	// {
-	// 	before: map[string]Alias{
-	// 		"foo":  NewAlias("foo", "bar"),
-	// 		"bar":  NewAlias("bar", "baz"),
-	// 		"test": NewAlias("test", "test"),
-	// 	},
-	// 	after: map[string]Alias{
-	// 		"foo":  NewAlias("foo", "bar"),
-	// 		"bar":  NewAlias("bar", "baz"),
-	// 		"test": NewAlias("test", "test"),
-	// 	},
-	// },
+	{
+		before: map[string]Alias{
+			"foo":  NewAlias("foo", "bar"),
+			"bar":  NewAlias("bar", "baz"),
+			"test": NewAlias("test", "test"),
+		},
+		after: map[string]Alias{
+			"foo":  NewAlias("foo", "bar"),
+			"bar":  NewAlias("bar", "baz"),
+			"test": NewAlias("test", "test"),
+		},
+	},
 	{
 		before: map[string]Alias{
 			"foo":  NewAlias("foo", "bar"),
@@ -80,20 +80,20 @@ var aliasTests = []struct {
 			"test": NewAlias("test", "resolvfobarobarbar-quux"),
 		},
 	},
-	// {
-	// 	before: map[string]Alias{
-	// 		"IP":    NewAlias("IP", "({{IPv4}}|{{IPv6}})"),
-	// 		"IPv4":  NewAlias("IPv4", `({{octet}}\.){3}\.{{octet}}`),
-	// 		"octet": NewAlias("octet", `\d{1,3}`),
-	// 		"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
-	// 	},
-	// 	after: map[string]Alias{
-	// 		"IP":    NewAlias("IP", `((\d{1,3}\.){3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
-	// 		"IPv4":  NewAlias("IPv4", `(\d{1,3}\.){3}\.\d{1,3}`),
-	// 		"octet": NewAlias("octet", `\d{1,3}`),
-	// 		"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
-	// 	},
-	// },
+	{
+		before: map[string]Alias{
+			"IP":    NewAlias("IP", "({{IPv4}}|{{IPv6}})"),
+			"IPv4":  NewAlias("IPv4", `({{octet}}\.){3}\.{{octet}}`),
+			"octet": NewAlias("octet", `\d{1,3}`),
+			"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
+		},
+		after: map[string]Alias{
+			"IP":    NewAlias("IP", `((\d{1,3}\.){3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
+			"IPv4":  NewAlias("IPv4", `(\d{1,3}\.){3}\.\d{1,3}`),
+			"octet": NewAlias("octet", `\d{1,3}`),
+			"IPv6":  NewAlias("IPv6", `([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}`),
+		},
+	},
 }
 
 func TestResolveAliases(t *testing.T) {
