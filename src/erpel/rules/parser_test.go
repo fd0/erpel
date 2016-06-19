@@ -1,9 +1,6 @@
 package rules
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 var testRuleConfigs = []struct {
 	cfg   string
@@ -156,6 +153,104 @@ field {
 			},
 		},
 	},
+	{
+		cfg: `
+		---
+	---
+`,
+		state: ruleState{
+			fields: map[string]field{},
+		},
+	},
+	{
+		cfg: `
+# this config is complete
+field f1 {
+	a = "1"
+	b = '2'
+}
+
+field f2 {
+	x = "y"
+	y = '..-..'
+	z = "foobar"
+} # comment
+
+---
+
+# just some template lines
+line 1
+line 2
+field {
+	foo = bar
+}
+
+# trailing comment
+
+ ------
+sample line 1
+ # and some more sample lines
+sample line 2....
+`,
+		state: ruleState{
+			fields: map[string]field{
+				"f1": field{
+					"a": `"1"`,
+					"b": `'2'`,
+				},
+				"f2": field{
+					"x": `"y"`,
+					"y": `'..-..'`,
+					"z": `"foobar"`,
+				},
+			},
+			templates: []string{
+				"line 1",
+				"line 2",
+				"field {",
+				"foo = bar",
+				"}",
+			},
+			samples: []string{
+				"sample line 1",
+				"sample line 2....",
+			},
+		},
+	},
+	{
+		cfg: `
+# this config file has no fields
+---
+
+# just some template lines
+line 1
+line 2
+field {
+	foo = bar
+}
+
+# trailing comment
+
+ ------
+sample line 1
+ # and some more sample lines
+sample line 2....
+`,
+		state: ruleState{
+			fields: map[string]field{},
+			templates: []string{
+				"line 1",
+				"line 2",
+				"field {",
+				"foo = bar",
+				"}",
+			},
+			samples: []string{
+				"sample line 1",
+				"sample line 2....",
+			},
+		},
+	},
 }
 
 func TestParseRuleConfig(t *testing.T) {
@@ -165,8 +260,6 @@ func TestParseRuleConfig(t *testing.T) {
 			t.Errorf("config %d: failed to parse: %v", i, err)
 			continue
 		}
-
-		fmt.Printf("test %d: %+v\n", i, state)
 
 		for fieldName, wantField := range test.state.fields {
 			gotField, ok := state.fields[fieldName]
@@ -212,6 +305,20 @@ func TestParseRuleConfig(t *testing.T) {
 			if test.state.templates[j] != state.templates[j] {
 				t.Errorf("test %v: template[%d]: want %q, got %q",
 					i, j, test.state.templates[j], state.templates[j])
+			}
+		}
+
+		if len(state.samples) != len(test.state.samples) {
+			t.Errorf("test %v: unexpected number of sample lines returned: want %d, got %d",
+				i, len(test.state.samples), len(state.samples))
+
+			continue
+		}
+
+		for j := range test.state.samples {
+			if test.state.samples[j] != state.samples[j] {
+				t.Errorf("test %v: samples[%d]: want %q, got %q",
+					i, j, test.state.samples[j], state.samples[j])
 			}
 		}
 	}

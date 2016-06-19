@@ -20,6 +20,8 @@ type ruleState struct {
 
 	// all message templates
 	templates []string
+	// some samples that must match the rules
+	samples []string
 }
 
 type field map[string]string
@@ -43,6 +45,14 @@ func (c *ruleState) addTemplate(s string) {
 		return
 	}
 	c.templates = append(c.templates, s)
+}
+
+func (c *ruleState) addSample(s string) {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		return
+	}
+	c.samples = append(c.samples, s)
 }
 
 // parseRuleFile returns the state for a configuration.

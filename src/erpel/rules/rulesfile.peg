@@ -5,7 +5,7 @@ type ruleParser Peg {
 }
 
 # this is the entry point to the grammar
-start <- Fields (Separator Templates)? EOF
+start <- Fields (Separator Templates (Separator Samples)?)? EOF
 
 Fields <- S (Field EOL?)* Field?
 Field <- "field" s FieldName s "{" statements "}" S
@@ -17,7 +17,7 @@ statements <- (line EOL)* line?
 line <- (Comment / Statement)? s
 
 Name <- < [a-zA-Z0-9-_]+ >                            { p.name = buffer[begin:end] }
-Statement <- s Name s '=' s String Comment?             { p.set(p.name, p.value) }
+Statement <- s Name s '=' s String Comment?           { p.set(p.name, p.value) }
 
 
 String <- DoubleQuotedString / SingleQuotedString / RawString
@@ -28,8 +28,11 @@ RawString <- < "`" ( !"`" . )* "`" >                       { p.value = buffer[be
 
 Separator <- s "---" "-"* s EOL
 
-Templates <- ((Comment / Template) EOL)*
-Template <- s <(!EOL .)*>                                  { p.addTemplate(buffer[begin:end]) }
+Templates <- (!Separator (Comment / Template) EOL)*
+Template <- s <(!EOL .)*>                             { p.addTemplate(buffer[begin:end]) }
+
+Samples <- ((Comment / Sample) EOL)*
+Sample <- s <(!EOL .)*>                               { p.addSample(buffer[begin:end]) }
 
 # comment to the end of the line
 Comment <- s '#' (!EOL .)*
