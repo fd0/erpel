@@ -287,7 +287,7 @@ var testConfigs = []struct {
 
 		foo {
 			bar = "baz"
-			other_var = 'config'
+			other_var = 'config' # comment after value
 		}`,
 		state: configState{
 			sections: map[string]section{
