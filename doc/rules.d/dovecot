@@ -1,7 +1,93 @@
-dovecot: imap-login: Login: user=<\S+>, method=PLAIN, rip=IP, lip=IP(, mpid=\d+)?, TLS(, session=<\S+>)?$
-dovecot: imap-login: Login: user=<\S+>, method=PLAIN, rip=::1, lip=::1, secured$
-dovecot: (lda|imap|pop3)\(\S+\): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead$
-dovecot: lda\(\S+\): sieve: msgid=<\S+>: stored mail into mailbox '\S+'$
-dovecot: IMAP\(\S+\): Disconnected: Logged out bytes=\d+\d+$
-dovecot: imap-login: Disconnected \(no auth attempts in \d+ secs\): user=<>, rip=[0-9a-f:.]+, lip=[0-9a-f:.]+, TLS handshaking: Disconnected, session=<\S+>$
-dovecot: imap\(\S+\): Disconnected: Logged out in=\d+ out=\d+$
+# The first section lists fields that are to be replaced in the sample messages
+# below.
+
+# A field consists of a name and a template (to insert the field).
+field timestamp {
+    template = 'Jun  2 23:17:13'
+    pattern = '\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}'
+}
+
+# A field can also list examples, these must match the defined pattern.
+field IP {
+    template = '1.2.3.4'
+    # this matches IPv4 and IPv6 addresses
+    pattern = '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})'
+
+    samples = ['192.168.100.1', '2003::feff:1234']
+}
+
+field hostname {
+    template = 'mail'
+    pattern = '\w+'
+}
+
+field mailaddress {
+    template = 'user@domain.tld'
+    pattern = '[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+'
+}
+
+field username {
+    template = 'username@domain'
+    pattern = '[a-zA-Z0-9_+.-](+@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+)?'
+}
+
+field msgid {
+    template = '20160602211704.9125E5A063@localhost'
+    pattern = '[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_+.-]+'
+}
+
+field mailbox {
+    template = 'INBOX'
+    pattern = '[a-zA-Z0-9_.+-]+'
+}
+
+field num {
+    template = '123'
+    pattern = '\d+'
+}
+
+field session {
+    template = 'O3h6IVI0sQBQu1D7'
+    pattern = '[a-zA-Z0-9+/]+'
+}
+
+---
+
+# This section lists the templates. In each line, the templates from the fields above are applied to mark the dynamic parts of a line.
+Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
+Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123
+Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@host.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap(user@host.tld): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@host.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap(username@domain): Disconnected: Logged out in=123 out=123
+Jun  2 23:17:13 avalon dovecot: imap-login: Login: user=<username@domain>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, TLS
+Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<username@domain>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+
+---
+
+# In this section, messages that should be ignored by the rules in this file can be listed.
+Jun  2 23:17:13 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'
+Jun  2 23:17:14 avalon dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042
+Jun  2 23:17:17 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=123.23.123.1, lip=192.168.0.1, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:17 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLAIN, rip=1234:1234::1234, lip=2a01:4f8::1234:1, mpid=32650, TLS, session=<0Xl9IVI0GAAqAQWYoAGvEHy/uaNfPKFR>
+Jun  2 23:17:17 mail dovecot: imap(me@domain.de): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:17 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=2003:::a07, lip=2a01:4f8::1234:1, TLS handshaking: Disconnected, session=<f9R/IVI0FgAgAwAGEX8Dgkmel+HCeAoH>
+Jun  2 23:17:17 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=87.444.65.555, lip=192.168.0.1, TLS handshaking: Disconnected, session=<u7iAIVI0FwBXhkHm>
+Jun  2 23:17:17 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLAIN, rip=2003::a07, lip=2a01:4f8::1234:1, mpid=32654, TLS, session=<fTmFIVI0GgAgAwAGEX8Dgkmel+HCeAoH>
+Jun  2 23:17:17 mail dovecot: imap(me@domain.de): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:18 mail dovecot: imap(me@domain.de): Disconnected: Logged out in=265 out=2230
+Jun  2 23:17:18 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLAIN, rip=2003::a07, lip=2a01:4f8::1234:1, mpid=32656, TLS, session=<DoKQIVI0GwAgAwAGEX8Dgkmel+HCeAoH>
+Jun  2 23:17:18 mail dovecot: imap(me@domain.de): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:18 mail dovecot: imap(me@domain.de): Disconnected: Logged out in=254 out=12452
+Jun  2 23:17:19 mail dovecot: imap(me@domain.de): Disconnected: Logged out in=265 out=2231
+Jun  2 23:17:35 avalon dovecot: imap-login: Login: user=<user2@domain2.net>, method=PLAIN, rip=93.222.333.444, lip=78.46.242.20, TLS
+Jun  2 23:17:35 avalon dovecot: IMAP(user2@domain2.net): Disconnected: Logged out bytes=32/344
+Jun  2 23:17:51 mail dovecot: imap-login: Login: user=<me@domain3.com>, method=PLAIN, rip=2003::8bf2, lip=2a01:4f8::1234:1, mpid=32675, TLS, session=<UbWLI1I0ZQAgAwAGEX8DgulymvSb3Yvy>
+Jun  2 23:17:51 mail dovecot: imap(me@domain3.com): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:56 mail dovecot: imap-login: Login: user=<me@domain3.com>, method=PLAIN, rip=2003::8bf2, lip=2a01:4f8::1234:1, mpid=32679, TLS, session=<M+XTI1I0bQAgAwAGEX8DgulymvSb3Yvy>
+Jun  2 23:17:56 mail dovecot: imap(me@domain3.com): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+
+# vim: ft=erpelrule

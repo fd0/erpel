@@ -1,2 +1,0 @@
-kernel: \[\d+.\d+\] INPUT reject:
-kernel: \[\d+.\d+\] INPUT-DROP:
