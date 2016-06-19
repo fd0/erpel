@@ -17,11 +17,13 @@ statements <- (line EOL)* line?
 line <- (Comment / Statement)? s
 
 Name <- < [a-zA-Z0-9-_]+ >                            { p.name = buffer[begin:end] }
-Statement <- s Name s '=' s String Comment?           { p.set(p.name, p.value) }
+Statement <- s Name s '=' s Value Comment?           { p.set(p.name, p.value) }
 
 
+Value <- List / String
 String <- DoubleQuotedString / SingleQuotedString / RawString
 
+List <- < "[" s (s String s "," s)* s String s "]" >       { p.value = buffer[begin:end] }
 SingleQuotedString <- < "'" ( "\\'" / !EOL !"'" . )* "'" > { p.value = buffer[begin:end] }
 DoubleQuotedString <- < '"' ( '\\"' / !EOL !'"' . )* '"' > { p.value = buffer[begin:end] }
 RawString <- < "`" ( !"`" . )* "`" >                       { p.value = buffer[begin:end] }

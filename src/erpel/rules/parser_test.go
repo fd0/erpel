@@ -39,6 +39,20 @@ var testRuleConfigs = []struct {
 		},
 	},
 	{
+		cfg: `field foo {
+	x = "y"
+	samples = ["a", 'b', 'xxxx']
+}`,
+		state: ruleState{
+			fields: map[string]field{
+				"foo": field{
+					"x":       `"y"`,
+					"samples": `["a", 'b', 'xxxx']`,
+				},
+			},
+		},
+	},
+	{
 		cfg: `# comment field
 field foo {
 	x = "y" # or else
@@ -323,21 +337,3 @@ func TestParseRuleConfig(t *testing.T) {
 		}
 	}
 }
-
-// var testInvalidConfig = []string{
-// 	`afoo=  `,
-// 	`a=b`,
-// 	` a = b`,
-// 	" a = 'foo\narb'",
-// 	" a = \"foo\narb\"",
-// }
-
-// func TestParseInvalidConfig(t *testing.T) {
-// 	for i, cfg := range testInvalidConfig {
-// 		_, err := parseConfig(cfg)
-// 		if err == nil {
-// 			t.Errorf("config %d: expected error for invalid config not found, config:\n%q", i, cfg)
-// 			continue
-// 		}
-// 	}
-// }
