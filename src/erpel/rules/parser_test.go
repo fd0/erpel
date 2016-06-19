@@ -123,6 +123,39 @@ field f2 {
 			},
 		},
 	},
+	{
+		cfg: `
+		---
+`,
+		state: ruleState{
+			fields: map[string]field{},
+		},
+	},
+	{
+		cfg: `
+# this config file has no fields
+---
+
+# just some template lines
+line 1
+line 2
+field {
+	foo = bar
+}
+
+# trailing comment
+`,
+		state: ruleState{
+			fields: map[string]field{},
+			templates: []string{
+				"line 1",
+				"line 2",
+				"field {",
+				"foo = bar",
+				"}",
+			},
+		},
+	},
 }
 
 func TestParseRuleConfig(t *testing.T) {
@@ -165,6 +198,20 @@ func TestParseRuleConfig(t *testing.T) {
 			_, ok := test.state.fields[fieldName]
 			if !ok {
 				t.Errorf("test %v: unexpected field %q found in parsed result", i, fieldName)
+			}
+		}
+
+		if len(state.templates) != len(test.state.templates) {
+			t.Errorf("test %v: unexpected number of template lines returned: want %d, got %d",
+				i, len(test.state.templates), len(state.templates))
+
+			continue
+		}
+
+		for j := range test.state.templates {
+			if test.state.templates[j] != state.templates[j] {
+				t.Errorf("test %v: template[%d]: want %q, got %q",
+					i, j, test.state.templates[j], state.templates[j])
 			}
 		}
 	}

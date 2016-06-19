@@ -17,6 +17,9 @@ type ruleState struct {
 
 	// collection of all fields encountered during parsing
 	fields map[string]field
+
+	// all message templates
+	templates []string
 }
 
 type field map[string]string
@@ -32,6 +35,14 @@ func (c *ruleState) set(key, value string) {
 	key = strings.TrimSpace(key)
 	value = strings.TrimSpace(value)
 	c.currentField[key] = value
+}
+
+func (c *ruleState) addTemplate(s string) {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		return
+	}
+	c.templates = append(c.templates, s)
 }
 
 // parseRuleFile returns the state for a configuration.
