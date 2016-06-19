@@ -1,0 +1,41 @@
+package rules
+
+type ruleParser Peg {
+    ruleState
+}
+
+# this is the entry point to the grammar
+start <- S (Field EOL?)* EOF
+#start <-  Field* s Messages? EOF
+
+# Messages <- ((Separator s Template*)? Separator Sample*)?
+
+Field <- "field" s FieldName s "{" statements "}" S
+
+FieldName <- < [a-zA-Z0-9-_]+ >                       { p.newField(buffer[begin:end]) }
+
+statements <- (line EOL)* line?
+
+line <- (Comment / Statement)? s
+
+Name <- < [a-zA-Z0-9-_]+ >                            { p.name = buffer[begin:end] }
+Statement <- s Name s '=' s String Comment?             { p.set(p.name, p.value) }
+
+
+String <- DoubleQuotedString / SingleQuotedString / RawString
+
+SingleQuotedString <- < "'" ( "\\'" / !EOL !"'" . )* "'" > { p.value = buffer[begin:end] }
+DoubleQuotedString <- < '"' ( '\\"' / !EOL !'"' . )* '"' > { p.value = buffer[begin:end] }
+RawString <- < "`" ( !"`" . )* "`" >                       { p.value = buffer[begin:end] }
+
+# comment to the end of the line
+Comment <- s '#' (!EOL .)*
+
+EOF <- !.
+EOL <- [\r\n]
+
+# Space
+s <- [ \t]*
+
+# lines with comments
+S <- s Comment? (Comment? EOL)*
