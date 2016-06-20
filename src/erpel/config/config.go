@@ -40,12 +40,26 @@ func fieldForName(obj *reflector.Obj, name, tag string) (*reflector.ObjField, er
 
 // unquoteString handles the different quotation kinds.
 func unquoteString(s string) (string, error) {
+	if s == "" {
+		return s, nil
+	}
+
+	if len(s) == 1 {
+		return "", probe.Trace(fmt.Errorf("invalid quoted string %q", s), s)
+	}
+
 	switch s[0] {
 	case '"':
 		return strconv.Unquote(s)
 	case '\'':
 		s = strings.Replace(s[1:len(s)-1], `\'`, `'`, -1)
 		return s, nil
+	case '`':
+		if s[len(s)-1] != '`' {
+			return "", probe.Trace(fmt.Errorf("invalid quoted string %q", s), s)
+		}
+
+		return s[1 : len(s)-1], nil
 	}
 
 	// raw strings

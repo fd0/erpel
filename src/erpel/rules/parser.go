@@ -1,6 +1,7 @@
 package rules
 
 import (
+	"io/ioutil"
 	"strings"
 
 	"github.com/fd0/probe"
@@ -77,27 +78,27 @@ func parseRuleFile(data string) (ruleState, error) {
 	return c.ruleState, nil
 }
 
-// // ParseConfig parses the data as an erpel config file.
-// func ParseConfig(data string) (Config, error) {
-// 	state, err := parseConfig(data)
-// 	if err != nil {
-// 		return Config{}, probe.Trace(err)
-// 	}
+// ParseRules parses the data as an erpel rule file.
+func ParseRules(data string) (Rules, error) {
+	state, err := parseRuleFile(data)
+	if err != nil {
+		return Rules{}, probe.Trace(err)
+	}
 
-// 	cfg, err := parseState(state)
-// 	if err != nil {
-// 		return Config{}, probe.Trace(err)
-// 	}
+	rules, err := parseState(state)
+	if err != nil {
+		return Rules{}, probe.Trace(err)
+	}
 
-// 	return cfg, nil
-// }
+	return rules, nil
+}
 
-// // ParseConfigFile loads config data from a file and parses it.
-// func ParseConfigFile(filename string) (Config, error) {
-// 	buf, err := ioutil.ReadFile(filename)
-// 	if err != nil {
-// 		return Config{}, err
-// 	}
+// ParseRulesFile loads rules from a file and parses it.
+func ParseRulesFile(filename string) (Rules, error) {
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return Rules{}, err
+	}
 
-// 	return ParseConfig(string(buf))
-// }
+	return ParseRules(string(buf))
+}

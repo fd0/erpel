@@ -57,8 +57,8 @@ var testUnquoteString = []struct {
 	result string
 }{
 	{
-		data:   "foobar",
-		result: "foobar",
+		data:   "",
+		result: "",
 	},
 	{
 		data:   `"foobar"`,
@@ -87,6 +87,10 @@ var testUnquoteString = []struct {
 	{
 		data:   `'foo \'bar '`,
 		result: "foo 'bar ",
+	},
+	{
+		data:   "`foo'\"bar `",
+		result: "foo'\"bar ",
 	},
 }
 
