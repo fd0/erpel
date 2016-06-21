@@ -15,13 +15,9 @@ var testConfigFiles = []struct {
 		data: `
 # load ignore rules from all files in this directory
 rules_dir = "/etc/erpel/rules.d"
-
-# prefix must match at the beginning of each line
-prefix = '^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+'
 `,
 		cfg: Config{
 			RulesDir: "/etc/erpel/rules.d",
-			Prefix:   `^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+`,
 		},
 	},
 }
