@@ -91,6 +91,10 @@ func ParseRules(data string) (Rules, error) {
 		return Rules{}, probe.Trace(err)
 	}
 
+	if err := rules.Check(); err != nil {
+		return Rules{}, err
+	}
+
 	return rules, nil
 }
 
