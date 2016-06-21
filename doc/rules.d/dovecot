@@ -27,7 +27,7 @@ field mailaddress {
 }
 
 field username {
-    template = 'username@domain'
+    template = 'username@domain.tld'
     pattern = '[a-zA-Z0-9_+.-]+(@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+)?'
 }
 
@@ -54,17 +54,17 @@ field session {
 ---
 
 # This section lists the templates. In each line, the templates from the fields above are applied to mark the dynamic parts of a line.
-Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
-Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123
+Jun  2 23:17:13 mail dovecot: lda(user@domain.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
+Jun  2 23:17:13 avalon dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
 Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@host.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap(user@host.tld): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap(user@domain.tld): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
 Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@host.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap(username@domain): Disconnected: Logged out in=123 out=123
-Jun  2 23:17:13 avalon dovecot: imap-login: Login: user=<username@domain>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, TLS
-Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<username@domain>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: imap(username@domain.tld): Disconnected: Logged out in=123 out=123
+Jun  2 23:17:13 avalon dovecot: imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, TLS
+Jun  2 23:17:13 avalon dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
+Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
 
 ---
 
