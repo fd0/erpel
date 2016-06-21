@@ -77,8 +77,29 @@ func TestParse(t *testing.T) {
 			continue
 		}
 
-		if !reflect.DeepEqual(rules, test.rules) {
-			t.Errorf("test %v: rules are not equal:\n  want:\n    %#v\n  got:\n    %#v", i, test.rules, rules)
+		if !reflect.DeepEqual(rules.Templates, test.rules.Templates) {
+			t.Errorf("test %v: templates are not equal:\n  want:\n    %#v\n  got:\n    %#v",
+				i, test.rules.Templates, rules.Templates)
+		}
+
+		if !reflect.DeepEqual(rules.Samples, test.rules.Samples) {
+			t.Errorf("test %v: samples are not equal:\n  want:\n    %#v\n  got:\n    %#v",
+				i, test.rules.Samples, rules.Samples)
+		}
+
+		names := make(map[string]struct{})
+		for name := range rules.Fields {
+			names[name] = struct{}{}
+		}
+		for name := range test.rules.Fields {
+			names[name] = struct{}{}
+		}
+
+		for name := range names {
+			if !rules.Fields[name].Equals(test.rules.Fields[name]) {
+				t.Errorf("   field %v is not equal:\n  want:\n     %+v\n  got:\n     %+v",
+					name, test.rules.Fields[name], rules.Fields[name])
+			}
 		}
 	}
 }
@@ -185,12 +206,19 @@ func TestSampleConfig(t *testing.T) {
 	for _, file := range files {
 		buf, err := ioutil.ReadFile(file)
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
+			continue
 		}
 
-		_, err = ParseRules(string(buf))
+		rules, err := ParseRules(string(buf))
 		if err != nil {
-			t.Fatalf("parsing rules file %v failed: %v", file, err)
+			t.Errorf("parsing rules file %v failed: %v", file, err)
+			continue
+		}
+
+		if err := rules.Check(); err != nil {
+			t.Errorf("checking rules in file %v failed: %v", file, err)
+			continue
 		}
 	}
 }
