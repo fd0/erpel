@@ -15,7 +15,6 @@ import (
 // Config holds all information parsed from a configuration file.
 type Config struct {
 	RulesDir string `name:"rules_dir"`
-	Prefix   string `name:"global_prefix"`
 }
 
 // fieldForName returns the field matching the name, either directly (via

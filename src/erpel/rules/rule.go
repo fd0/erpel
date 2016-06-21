@@ -140,8 +140,8 @@ func parseState(state ruleState) (Rules, error) {
 	return rules, nil
 }
 
-// regexps returns the rules as a list of regexps. These are cached internally.
-func (r *Rules) regexps() (rules []*regexp.Regexp) {
+// RegExps returns the rules as a list of regexps. These are cached internally.
+func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 	if r.rexs != nil {
 		return r.rexs
 	}
@@ -220,9 +220,9 @@ func (f Field) Equals(other Field) bool {
 	return true
 }
 
-// Match tests if a rule matches s.
+// Match tests if a rule matches s completely.
 func (r *Rules) Match(s string) bool {
-	for _, rule := range r.regexps() {
+	for _, rule := range r.RegExps() {
 		if err := checkPattern(rule, s); err == nil {
 			return true
 		}

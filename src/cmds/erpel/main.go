@@ -2,11 +2,10 @@ package main
 
 import (
 	"bufio"
-	"erpel"
 	"erpel/config"
+	"erpel/rules"
 	"fmt"
 	"os"
-	"regexp"
 	"runtime"
 	"strings"
 
@@ -94,7 +93,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := config.LoadAllRules(cfg.RulesDir, cfg.Aliases)
+	rules, err := rules.ParseAllRulesFiles(cfg.RulesDir)
 	if err != nil {
 		Erx(err, 3)
 	}
@@ -103,28 +102,11 @@ func main() {
 
 	if opts.Debug {
 		for _, rule := range rules {
-			D("  Rule: %v\n", rule)
-		}
-
-		for key, value := range cfg.Aliases {
-			D("  Alias %v -> %v\n", key, value)
+			for _, r := range rule.RegExps() {
+				D("  Rule: %v\n", r.String())
+			}
 		}
 	}
-
-	filter := erpel.Filter{
-		Rules: rules,
-	}
-
-	if cfg.Prefix != "" {
-		r, err := regexp.Compile(cfg.Prefix)
-		if err != nil {
-			Erx(err, 4)
-		}
-
-		filter.Prefix = r
-	}
-
-	D("  global prefix is %v\n", filter.Prefix)
 
 	for _, logfile := range opts.Logfiles {
 		V("processing %v\n", logfile)
@@ -136,14 +118,17 @@ func main() {
 		}
 
 		sc := bufio.NewScanner(f)
+	nextLine:
 		for sc.Scan() {
 			line := strings.TrimSpace(sc.Text())
 
-			result := filter.Process([]string{line})
-
-			for _, line := range result {
-				fmt.Println(line)
+			for _, rule := range rules {
+				if rule.Match(line) {
+					continue nextLine
+				}
 			}
+
+			fmt.Println(line)
 		}
 
 		err = f.Close()

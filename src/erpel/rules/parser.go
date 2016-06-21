@@ -2,6 +2,7 @@ package rules
 
 import (
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
 	"github.com/fd0/probe"
@@ -101,4 +102,24 @@ func ParseRulesFile(filename string) (Rules, error) {
 	}
 
 	return ParseRules(string(buf))
+}
+
+// ParseAllRulesFiles loads rules from all files in the directory.
+func ParseAllRulesFiles(dir string) (rules []Rules, err error) {
+	pattern := filepath.Join(dir, "*")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, probe.Trace(err, pattern)
+	}
+
+	for _, file := range matches {
+		r, err := ParseRulesFile(file)
+		if err != nil {
+			return nil, probe.Trace(err, file)
+		}
+
+		rules = append(rules, r)
+	}
+
+	return rules, nil
 }
