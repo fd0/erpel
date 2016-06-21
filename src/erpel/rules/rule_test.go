@@ -29,18 +29,35 @@ field IP {
     samples = ['192.168.100.1', '2003::feff:1234']
 }
 
+field msgid {
+	template = '20160602211704.9125E5A063@localhost'
+	pattern = '[a-zA-Z0-9.=@/-]+'
+}
+
+field mailaddress {
+    template = 'user@host.tld'
+    pattern = '[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+'
+}
+
+field username {
+    template = 'username@domain.tld'
+    pattern = '[a-zA-Z0-9_+.-]+(@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+)?'
+}
+
+field num {
+    template = '123'
+    pattern = '\d+'
+}
+
 ------------------
 
 Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
-Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123
-Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
 
 --------------
 
-Jun  2 23:17:13 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'
-Jun  2 23:17:14 avalon dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042
-Jun  2 23:17:17 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=123.23.123.1, lip=192.168.0.1, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:17 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLAIN, rip=1234:1234::1234, lip=2a01:4f8::1234:1, mpid=32650, TLS, session=<0Xl9IVI0GAAqAQWYoAGvEHy/uaNfPKFR>
+Jun  2 23:17:18 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'
+Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042
 `,
 		rules: Rules{
 			Fields: map[string]Field{
@@ -53,17 +70,30 @@ Jun  2 23:17:17 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLA
 					Pattern:  regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
 					Samples:  []string{"192.168.100.1", "2003::feff:1234"},
 				},
+				"msgid": Field{
+					Template: "20160602211704.9125E5A063@localhost",
+					Pattern:  regexp.MustCompile(`[a-zA-Z0-9.=@/-]+`),
+				},
+				"mailaddress": Field{
+					Template: "user@host.tld",
+					Pattern:  regexp.MustCompile(`[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+`),
+				},
+				"username": Field{
+					Template: "username@domain.tld",
+					Pattern:  regexp.MustCompile(`[a-zA-Z0-9_+.-]+(@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+)?`),
+				},
+				"num": Field{
+					Template: "123",
+					Pattern:  regexp.MustCompile(`\d+`),
+				},
 			},
 			Templates: []string{
 				`Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'`,
-				`Jun  2 23:17:13 avalon dovecot: IMAP(username@domain): Disconnected: Logged out bytes=123/123`,
-				`Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>`,
+				`Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123`,
 			},
 			Samples: []string{
-				`Jun  2 23:17:13 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'`,
-				`Jun  2 23:17:14 avalon dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042`,
-				`Jun  2 23:17:17 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=123.23.123.1, lip=192.168.0.1, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>`,
-				`Jun  2 23:17:17 mail dovecot: imap-login: Login: user=<me@domain.de>, method=PLAIN, rip=1234:1234::1234, lip=2a01:4f8::1234:1, mpid=32650, TLS, session=<0Xl9IVI0GAAqAQWYoAGvEHy/uaNfPKFR>`,
+				`Jun  2 23:17:18 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'`,
+				`Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042`,
 			},
 		},
 	},
