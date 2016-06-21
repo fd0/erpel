@@ -18,22 +18,10 @@ rules_dir = "/etc/erpel/rules.d"
 
 # prefix must match at the beginning of each line
 prefix = '^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+'
-
-aliases{
-IP = "({{IPv4}}|{{IPv6}})"
-IPv4 = '\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}'
-IPv6 = "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"
-}
 `,
 		cfg: Config{
 			RulesDir: "/etc/erpel/rules.d",
 			Prefix:   `^\w{3} [ :0-9 ]{11} [._[:alnum:]-]+`,
-
-			Aliases: map[string]Alias{
-				"IP":   NewAlias("IP", `(\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
-				"IPv4": NewAlias("IPv4", `\d{0,3}\.\d{0,3}\.\d{0,3}\.\d{0,3}`),
-				"IPv6": NewAlias("IPv6", "([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4}"),
-			},
 		},
 	},
 }

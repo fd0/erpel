@@ -16,8 +16,6 @@ import (
 type Config struct {
 	RulesDir string `name:"rules_dir"`
 	Prefix   string `name:"global_prefix"`
-
-	Aliases map[string]Alias
 }
 
 // fieldForName returns the field matching the name, either directly (via
@@ -146,11 +144,6 @@ func parseState(state configState) (Config, error) {
 		switch name {
 		case "":
 			err = apply(data, "name", &cfg)
-		case "aliases":
-			err = unquoteMap(data)
-			if err == nil {
-				cfg.Aliases, err = parseAliases(data)
-			}
 		default:
 			err = fmt.Errorf("unknown section %v", name)
 		}
@@ -160,16 +153,5 @@ func parseState(state configState) (Config, error) {
 		}
 	}
 
-	cfg.Prefix = ApplyAliases(cfg.Aliases, cfg.Prefix)
-
 	return cfg, nil
-}
-
-// ApplyAliases will replace all aliases in the string s.
-func ApplyAliases(aliases map[string]Alias, s string) string {
-	for _, alias := range aliases {
-		s = strings.Replace(s, "{{"+alias.Name+"}}", alias.Value, -1)
-	}
-
-	return s
 }
