@@ -1,8 +1,10 @@
-package config
+package erpel
 
 import (
+	"erpel/config"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"regexp"
 	"strings"
@@ -106,10 +108,10 @@ func compileRegexp(data map[string]string) (map[string]*regexp.Regexp, error) {
 }
 
 // parseState returns a Config struct from a state.
-func parseState(state configState) (Config, error) {
+func parseState(state config.State) (Config, error) {
 	cfg := Config{}
 
-	for name, data := range state.sections {
+	for name, data := range state.Sections {
 		var err error
 		switch name {
 		case "":
@@ -124,4 +126,29 @@ func parseState(state configState) (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+// ParseConfig parses data as an erpel config file.
+func ParseConfig(data string) (Config, error) {
+	state, err := config.Parse(data)
+	if err != nil {
+		return Config{}, probe.Trace(err)
+	}
+
+	cfg, err := parseState(state)
+	if err != nil {
+		return Config{}, probe.Trace(err)
+	}
+
+	return cfg, nil
+}
+
+// ParseConfigFile loads a config from a file.
+func ParseConfigFile(filename string) (Config, error) {
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return Config{}, err
+	}
+
+	return ParseConfig(string(buf))
 }

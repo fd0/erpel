@@ -1,4 +1,4 @@
-package config
+package erpel
 
 import (
 	"io/ioutil"
@@ -99,7 +99,7 @@ Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/
 	},
 }
 
-func TestParse(t *testing.T) {
+func TestRulesParse(t *testing.T) {
 	for i, test := range testRulesFiles {
 		rules, err := ParseRules(test.data)
 		if err != nil {
@@ -134,8 +134,8 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestSampleConfig(t *testing.T) {
-	files, err := filepath.Glob(filepath.Join("testdata", "*"))
+func TestParseSampleRules(t *testing.T) {
+	files, err := filepath.Glob(filepath.Join("testdata", "*.rules"))
 	if err != nil {
 		t.Fatalf("unable to list directory testdata/: %v", err)
 	}

@@ -2,8 +2,7 @@ package main
 
 import (
 	"bufio"
-	"erpel/config"
-	"erpel/rules"
+	"erpel"
 	"fmt"
 	"os"
 	"runtime"
@@ -85,7 +84,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg, err := config.ParseConfigFile(opts.Config)
+	cfg, err := erpel.ParseConfigFile(opts.Config)
 	if err != nil {
 		Erx(err, 2)
 	}
@@ -93,7 +92,7 @@ func main() {
 	V("config loaded from %v\n", opts.Config)
 	D("  config: %#v\n", cfg)
 
-	rules, err := rules.ParseAllRulesFiles(cfg.RulesDir)
+	rules, err := erpel.ParseAllRulesFiles(cfg.RulesDir)
 	if err != nil {
 		Erx(err, 3)
 	}

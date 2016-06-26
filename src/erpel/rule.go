@@ -1,8 +1,11 @@
-package config
+package erpel
 
 import (
+	"erpel/rules"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -27,12 +30,12 @@ type Field struct {
 }
 
 // parseRuleState returns a Rules from a state.
-func parseRuleState(state ruleState) (Rules, error) {
+func parseRuleState(state rules.State) (Rules, error) {
 	rules := Rules{
 		Fields: make(map[string]Field),
 	}
 
-	for name, field := range state.fields {
+	for name, field := range state.Fields {
 		var (
 			err error
 			f   Field
@@ -73,8 +76,8 @@ func parseRuleState(state ruleState) (Rules, error) {
 		rules.Fields[name] = f
 	}
 
-	rules.Templates = state.templates
-	rules.Samples = state.samples
+	rules.Templates = state.Templates
+	rules.Samples = state.Samples
 
 	return rules, nil
 }
@@ -180,4 +183,53 @@ func (r *Rules) Check() error {
 	}
 
 	return nil
+}
+
+// ParseRules parses the data as an erpel rule file.
+func ParseRules(data string) (Rules, error) {
+	state, err := rules.Parse(data)
+	if err != nil {
+		return Rules{}, probe.Trace(err)
+	}
+
+	rules, err := parseRuleState(state)
+	if err != nil {
+		return Rules{}, probe.Trace(err)
+	}
+
+	if err := rules.Check(); err != nil {
+		return Rules{}, err
+	}
+
+	return rules, nil
+}
+
+// ParseRulesFile loads rules from a file and parses it.
+func ParseRulesFile(filename string) (Rules, error) {
+	buf, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return Rules{}, err
+	}
+
+	return ParseRules(string(buf))
+}
+
+// ParseAllRulesFiles loads rules from all files in the directory.
+func ParseAllRulesFiles(dir string) (rules []Rules, err error) {
+	pattern := filepath.Join(dir, "*")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return nil, probe.Trace(err, pattern)
+	}
+
+	for _, file := range matches {
+		r, err := ParseRulesFile(file)
+		if err != nil {
+			return nil, probe.Trace(err, file)
+		}
+
+		rules = append(rules, r)
+	}
+
+	return rules, nil
 }

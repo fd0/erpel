@@ -1,6 +1,7 @@
-package config
+package erpel
 
 import (
+	"erpel/config"
 	"io/ioutil"
 	"path/filepath"
 	"reflect"
@@ -22,7 +23,7 @@ rules_dir = "/etc/erpel/rules.d"
 	},
 }
 
-func TestParse(t *testing.T) {
+func TestParseConfig(t *testing.T) {
 	for i, test := range testConfigFiles {
 		cfg, err := ParseConfig(test.data)
 		if err != nil {
@@ -36,13 +37,13 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestSampleConfig(t *testing.T) {
+func TestParseSampleConfig(t *testing.T) {
 	buf, err := ioutil.ReadFile(filepath.Join("testdata", "erpel.conf"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = ParseConfig(string(buf))
+	_, err = config.Parse(string(buf))
 	if err != nil {
 		t.Fatalf("parsing sample config failed: %v", err)
 	}

@@ -1,28 +1,28 @@
-package config
+package rules
 
 import "testing"
 
 var testRuleConfigs = []struct {
 	cfg   string
-	state ruleState
+	state State
 }{
 	{
 		cfg: ``,
-		state: ruleState{
-			fields: map[string]field{},
+		state: State{
+			Fields: map[string]Field{},
 		},
 	},
 	{
 		cfg: `# comment, nothing more`,
-		state: ruleState{
-			fields: map[string]field{},
+		state: State{
+			Fields: map[string]Field{},
 		},
 	},
 	{
 		cfg: `field foo {}`,
-		state: ruleState{
-			fields: map[string]field{
-				"foo": field{},
+		state: State{
+			Fields: map[string]Field{
+				"foo": Field{},
 			},
 		},
 	},
@@ -30,9 +30,9 @@ var testRuleConfigs = []struct {
 		cfg: `field foo {
 	x = "y"
 }`,
-		state: ruleState{
-			fields: map[string]field{
-				"foo": field{
+		state: State{
+			Fields: map[string]Field{
+				"foo": Field{
 					"x": `"y"`,
 				},
 			},
@@ -43,9 +43,9 @@ var testRuleConfigs = []struct {
 	x = "y"
 	samples = ["a", 'b', 'xxxx']
 }`,
-		state: ruleState{
-			fields: map[string]field{
-				"foo": field{
+		state: State{
+			Fields: map[string]Field{
+				"foo": Field{
 					"x":       `"y"`,
 					"samples": `["a", 'b', 'xxxx']`,
 				},
@@ -60,9 +60,9 @@ field foo {
 
 # and another
 `,
-		state: ruleState{
-			fields: map[string]field{
-				"foo": field{
+		state: State{
+			Fields: map[string]Field{
+				"foo": Field{
 					"x": `"y"`,
 				},
 			},
@@ -70,9 +70,9 @@ field foo {
 	},
 	{
 		cfg: `field f1 { x = "y" }`,
-		state: ruleState{
-			fields: map[string]field{
-				"f1": field{
+		state: State{
+			Fields: map[string]Field{
+				"f1": Field{
 					"x": `"y"`,
 				},
 			},
@@ -83,9 +83,9 @@ field foo {
 			a = "1"
 			b = '2'
 	}`,
-		state: ruleState{
-			fields: map[string]field{
-				"f1": field{
+		state: State{
+			Fields: map[string]Field{
+				"f1": Field{
 					"a": `"1"`,
 					"b": `'2'`,
 				},
@@ -98,9 +98,9 @@ field f1 {
 	a = "1"
 	b = '2'
 }`,
-		state: ruleState{
-			fields: map[string]field{
-				"f1": field{
+		state: State{
+			Fields: map[string]Field{
+				"f1": Field{
 					"a": `"1"`,
 					"b": `'2'`,
 				},
@@ -120,13 +120,13 @@ field f2 {
 	z = "foobar"
 } # comment
 `,
-		state: ruleState{
-			fields: map[string]field{
-				"f1": field{
+		state: State{
+			Fields: map[string]Field{
+				"f1": Field{
 					"a": `"1"`,
 					"b": `'2'`,
 				},
-				"f2": field{
+				"f2": Field{
 					"x": `"y"`,
 					"y": `'..-..'`,
 					"z": `"foobar"`,
@@ -138,13 +138,13 @@ field f2 {
 		cfg: `
 		---
 `,
-		state: ruleState{
-			fields: map[string]field{},
+		state: State{
+			Fields: map[string]Field{},
 		},
 	},
 	{
 		cfg: `
-# this config file has no fields
+# this config file has no Fields
 ---
 
 # just some template lines
@@ -156,9 +156,9 @@ field {
 
 # trailing comment
 `,
-		state: ruleState{
-			fields: map[string]field{},
-			templates: []string{
+		state: State{
+			Fields: map[string]Field{},
+			Templates: []string{
 				"line 1",
 				"line 2",
 				"field {",
@@ -172,8 +172,8 @@ field {
 		---
 	---
 `,
-		state: ruleState{
-			fields: map[string]field{},
+		state: State{
+			Fields: map[string]Field{},
 		},
 	},
 	{
@@ -206,26 +206,26 @@ sample line 1
  # and some more sample lines
 sample line 2....
 `,
-		state: ruleState{
-			fields: map[string]field{
-				"f1": field{
+		state: State{
+			Fields: map[string]Field{
+				"f1": Field{
 					"a": `"1"`,
 					"b": `'2'`,
 				},
-				"f2": field{
+				"f2": Field{
 					"x": `"y"`,
 					"y": `'..-..'`,
 					"z": `"foobar"`,
 				},
 			},
-			templates: []string{
+			Templates: []string{
 				"line 1",
 				"line 2",
 				"field {",
 				"foo = bar",
 				"}",
 			},
-			samples: []string{
+			Samples: []string{
 				"sample line 1",
 				"sample line 2....",
 			},
@@ -233,7 +233,7 @@ sample line 2....
 	},
 	{
 		cfg: `
-# this config file has no fields
+# this config file has no Fields
 ---
 
 # just some template lines
@@ -250,16 +250,16 @@ sample line 1
  # and some more sample lines
 sample line 2....
 `,
-		state: ruleState{
-			fields: map[string]field{},
-			templates: []string{
+		state: State{
+			Fields: map[string]Field{},
+			Templates: []string{
 				"line 1",
 				"line 2",
 				"field {",
 				"foo = bar",
 				"}",
 			},
-			samples: []string{
+			Samples: []string{
 				"sample line 1",
 				"sample line 2....",
 			},
@@ -269,14 +269,14 @@ sample line 2....
 
 func TestParseRuleConfig(t *testing.T) {
 	for i, test := range testRuleConfigs {
-		state, err := parseRuleFile(test.cfg)
+		state, err := Parse(test.cfg)
 		if err != nil {
 			t.Errorf("config %d: failed to parse: %v", i, err)
 			continue
 		}
 
-		for fieldName, wantField := range test.state.fields {
-			gotField, ok := state.fields[fieldName]
+		for fieldName, wantField := range test.state.Fields {
+			gotField, ok := state.Fields[fieldName]
 			if !ok {
 				t.Errorf("test %v: field %q not found in parsed result", i, fieldName)
 				continue
@@ -301,38 +301,38 @@ func TestParseRuleConfig(t *testing.T) {
 			}
 		}
 
-		for fieldName := range state.fields {
-			_, ok := test.state.fields[fieldName]
+		for fieldName := range state.Fields {
+			_, ok := test.state.Fields[fieldName]
 			if !ok {
 				t.Errorf("test %v: unexpected field %q found in parsed result", i, fieldName)
 			}
 		}
 
-		if len(state.templates) != len(test.state.templates) {
+		if len(state.Templates) != len(test.state.Templates) {
 			t.Errorf("test %v: unexpected number of template lines returned: want %d, got %d",
-				i, len(test.state.templates), len(state.templates))
+				i, len(test.state.Templates), len(state.Templates))
 
 			continue
 		}
 
-		for j := range test.state.templates {
-			if test.state.templates[j] != state.templates[j] {
+		for j := range test.state.Templates {
+			if test.state.Templates[j] != state.Templates[j] {
 				t.Errorf("test %v: template[%d]: want %q, got %q",
-					i, j, test.state.templates[j], state.templates[j])
+					i, j, test.state.Templates[j], state.Templates[j])
 			}
 		}
 
-		if len(state.samples) != len(test.state.samples) {
+		if len(state.Samples) != len(test.state.Samples) {
 			t.Errorf("test %v: unexpected number of sample lines returned: want %d, got %d",
-				i, len(test.state.samples), len(state.samples))
+				i, len(test.state.Samples), len(state.Samples))
 
 			continue
 		}
 
-		for j := range test.state.samples {
-			if test.state.samples[j] != state.samples[j] {
+		for j := range test.state.Samples {
+			if test.state.Samples[j] != state.Samples[j] {
 				t.Errorf("test %v: samples[%d]: want %q, got %q",
-					i, j, test.state.samples[j], state.samples[j])
+					i, j, test.state.Samples[j], state.Samples[j])
 			}
 		}
 	}

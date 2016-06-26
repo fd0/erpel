@@ -1,4 +1,4 @@
-package config
+package rules
 
 import (
 	"fmt"
@@ -406,7 +406,7 @@ func (t *tokens32) Expand(index int) tokenTree {
 }
 
 type ruleParser struct {
-	ruleState
+	State
 
 	Buffer string
 	buffer []rune

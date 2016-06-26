@@ -4,53 +4,53 @@ import "testing"
 
 var testConfigs = []struct {
 	cfg   string
-	state configState
+	state State
 }{
 	{
 		cfg: ``,
-		state: configState{
-			sections: map[string]section{
-				"": section{},
+		state: State{
+			Sections: map[string]Section{
+				"": Section{},
 			},
 		},
 	},
 	{
 		cfg: `afoo=  ''  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{"afoo": "''"},
+		state: State{
+			Sections: map[string]Section{
+				"": Section{"afoo": "''"},
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar baz  quux`  ",
-		state: configState{
-			sections: map[string]section{
-				"": section{"foo": "`bar baz  quux`"},
+		state: State{
+			Sections: map[string]Section{
+				"": Section{"foo": "`bar baz  quux`"},
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar'\" baz quux`  ",
-		state: configState{
-			sections: map[string]section{
-				"": section{"foo": "`bar'\" baz quux`"},
+		state: State{
+			Sections: map[string]Section{
+				"": Section{"foo": "`bar'\" baz quux`"},
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar\nbaz\t\nquux`  ",
-		state: configState{
-			sections: map[string]section{
-				"": section{"foo": "`bar\nbaz\t\nquux`"},
+		state: State{
+			Sections: map[string]Section{
+				"": Section{"foo": "`bar\nbaz\t\nquux`"},
 			},
 		},
 	},
 	{
 		cfg: `a="b"`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"a": `"b"`,
 				},
 			},
@@ -58,9 +58,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `a ="b"  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"a": `"b"`,
 				},
 			},
@@ -68,9 +68,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `  x = 'y'`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"x": "'y'",
 				},
 			},
@@ -78,9 +78,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `a    = 'b='`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"a": "'b='",
 				},
 			},
@@ -91,9 +91,9 @@ var testConfigs = []struct {
 			foo = "bar"
 			baz= 'bumppp'
 			`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"foo": `"bar"`,
 					"baz": "'bumppp'",
 				},
@@ -105,9 +105,9 @@ var testConfigs = []struct {
 		# test comment
 		baz= "bumppp"
 			`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"foo": `"bar"`,
 					"baz": `"bumppp"`,
 				},
@@ -116,9 +116,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: ` foo = "bar baz" `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"foo": `"bar baz"`,
 				},
 			},
@@ -131,9 +131,9 @@ var testConfigs = []struct {
 		# comment with spaces
 		zz="3"
 		key ="Value!   "`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"xx":  "'1'",
 					"yy":  `"2 a oesu saoe ustha osenuthh"`,
 					"key": `"Value!   "`,
@@ -145,9 +145,9 @@ var testConfigs = []struct {
 	{
 		cfg: `foo='bar'
 		test = "foobar"`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"foo":  "'bar'",
 					"test": `"foobar"`,
 				},
@@ -156,9 +156,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `test = "foobar"`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"test": `"foobar"`,
 				},
 			},
@@ -166,9 +166,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `test = "foo\nb\"ar"`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"test": `"foo\nb\"ar"`,
 				},
 			},
@@ -176,9 +176,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `test = '  foo bar'  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"test": `'  foo bar'`,
 				},
 			},
@@ -186,9 +186,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `test = '  foo \'bar'  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"test": `'  foo \'bar'`,
 				},
 			},
@@ -196,9 +196,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `Foo-baR_ = "xxy"  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"Foo-baR_": `"xxy"`,
 				},
 			},
@@ -206,9 +206,9 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `Foo_baR = "xxy"  `,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"Foo_baR": `"xxy"`,
 				},
 			},
@@ -219,9 +219,9 @@ var testConfigs = []struct {
 	test = "foobar"
 	# comment
 	x =   "y! "`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"foo":  `"bar"`,
 					"test": `"foobar"`,
 					"x":    `"y! "`,
@@ -231,10 +231,10 @@ var testConfigs = []struct {
 	},
 	{
 		cfg: `foo{}`,
-		state: configState{
-			sections: map[string]section{
-				"":    section{},
-				"foo": section{},
+		state: State{
+			Sections: map[string]Section{
+				"":    Section{},
+				"foo": Section{},
 			},
 		},
 	},
@@ -243,10 +243,10 @@ var testConfigs = []struct {
 			bar_2 = 'baz'
 			quux = 'fump'
 		}`,
-		state: configState{
-			sections: map[string]section{
-				"": section{},
-				"foo": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{},
+				"foo": Section{
 					"bar_2": "'baz'",
 					"quux":  "'fump'",
 				},
@@ -260,20 +260,20 @@ var testConfigs = []struct {
 		# bit of space after the section
 
 		`,
-		state: configState{
-			sections: map[string]section{
-				"":    section{},
-				"foo": section{},
+		state: State{
+			Sections: map[string]Section{
+				"":    Section{},
+				"foo": Section{},
 			},
 		},
 	},
 	{
 		cfg: `foo {bar = 'baz'
 		}`,
-		state: configState{
-			sections: map[string]section{
-				"": section{},
-				"foo": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{},
+				"foo": Section{
 					"bar": "'baz'",
 				},
 			},
@@ -289,13 +289,13 @@ var testConfigs = []struct {
 			bar = "baz"
 			other_var = 'config' # comment after value
 		}`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"before":          "'foobar Test'",
 					"name_With_chars": `"x"`,
 				},
-				"foo": section{
+				"foo": Section{
 					"bar":       `"baz"`,
 					"other_var": "'config'",
 				},
@@ -317,15 +317,15 @@ local_rules {
 other_global_vars = 'X'
 
 	`,
-		state: configState{
-			sections: map[string]section{
-				"": section{
+		state: State{
+			Sections: map[string]Section{
+				"": Section{
 					"global_setting1":   `"value1"`,
 					"glob_set2":         `"foobar"`,
 					"x":                 `"y! "`,
 					"other_global_vars": "'X'",
 				},
-				"local_rules": section{
+				"local_rules": Section{
 					"loc_set1": "'v1'",
 					"loc_set2": `"this is just a test"`,
 				},
@@ -336,16 +336,16 @@ other_global_vars = 'X'
 
 func TestParseConfig(t *testing.T) {
 	for i, test := range testConfigs {
-		state, err := parseConfig(test.cfg)
+		state, err := Parse(test.cfg)
 		if err != nil {
 			t.Errorf("config %d: failed to parse: %v", i, err)
 			continue
 		}
 
-		for secName, section := range test.state.sections {
-			// t.Logf("test %v: got sections:\n%#v", i, state.sections)
+		for secName, section := range test.state.Sections {
+			// t.Logf("test %v: got Sections:\n%#v", i, state.Sections)
 
-			sec, ok := state.sections[secName]
+			sec, ok := state.Sections[secName]
 			if !ok {
 				t.Errorf("test %v: section %q not found in parsed result", i, secName)
 				continue
@@ -370,8 +370,8 @@ func TestParseConfig(t *testing.T) {
 			}
 		}
 
-		for secName := range state.sections {
-			_, ok := test.state.sections[secName]
+		for secName := range state.Sections {
+			_, ok := test.state.Sections[secName]
 			if !ok {
 				t.Errorf("test %v: unexpected section %q found in parsed result", i, secName)
 			}
@@ -389,7 +389,7 @@ var testInvalidConfig = []string{
 
 func TestParseInvalidConfig(t *testing.T) {
 	for i, cfg := range testInvalidConfig {
-		_, err := parseConfig(cfg)
+		_, err := Parse(cfg)
 		if err == nil {
 			t.Errorf("config %d: expected error for invalid config not found, config:\n%q", i, cfg)
 			continue

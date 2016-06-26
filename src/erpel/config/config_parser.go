@@ -1,7 +1,7 @@
+// Package config contains the low-level configuration file parser.
 package config
 
 import (
-	"io/ioutil"
 	"strings"
 
 	"github.com/fd0/probe"
@@ -9,46 +9,47 @@ import (
 
 //go:generate peg configfile.peg
 
-// configState is the internal state used for parsing the config file.
-type configState struct {
+// State is the internal state used for parsing the config file.
+type State struct {
 	// used to temporarily store values while parsing
 	name, value string
 
-	currentSection section
+	currentSection Section
 
 	// collection of all statements encountered during parsing
-	sections map[string]section
+	Sections map[string]Section
 }
 
-type section map[string]string
+// Section contains statements within a section.
+type Section map[string]string
 
-func (c *configState) newSection(name string) {
+func (c *State) newSection(name string) {
 	name = strings.TrimSpace(name)
-	sec := make(section)
-	c.sections[name] = sec
+	sec := make(Section)
+	c.Sections[name] = sec
 	c.currentSection = sec
 }
 
-func (c *configState) setDefaultSection() {
-	c.currentSection = c.sections[""]
+func (c *State) setDefaultSection() {
+	c.currentSection = c.Sections[""]
 }
 
-func (c *configState) set(key, value string) {
+func (c *State) set(key, value string) {
 	key = strings.TrimSpace(key)
 	value = strings.TrimSpace(value)
 	c.currentSection[key] = value
 }
 
-// parseConfig returns the state for a configuration.
-func parseConfig(data string) (configState, error) {
-	defaultSection := make(section)
-	sections := make(map[string]section)
+// Parse returns the state for a configuration.
+func Parse(data string) (State, error) {
+	defaultSection := make(Section)
+	sections := make(map[string]Section)
 	sections[""] = defaultSection
 
 	c := &erpelParser{
-		configState: configState{
+		State: State{
 			currentSection: defaultSection,
-			sections:       sections,
+			Sections:       sections,
 		},
 		Buffer: data,
 	}
@@ -56,34 +57,9 @@ func parseConfig(data string) (configState, error) {
 	c.Init()
 	err := c.Parse()
 	if err != nil {
-		return configState{}, probe.Trace(err, data)
+		return State{}, probe.Trace(err, data)
 	}
 	c.Execute()
 
-	return c.configState, nil
-}
-
-// ParseConfig parses the data as an erpel config file.
-func ParseConfig(data string) (Config, error) {
-	state, err := parseConfig(data)
-	if err != nil {
-		return Config{}, probe.Trace(err)
-	}
-
-	cfg, err := parseState(state)
-	if err != nil {
-		return Config{}, probe.Trace(err)
-	}
-
-	return cfg, nil
-}
-
-// ParseConfigFile loads config data from a file and parses it.
-func ParseConfigFile(filename string) (Config, error) {
-	buf, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return Config{}, err
-	}
-
-	return ParseConfig(string(buf))
+	return c.State, nil
 }
