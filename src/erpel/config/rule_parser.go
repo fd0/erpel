@@ -1,4 +1,4 @@
-package rules
+package config
 
 import (
 	"io/ioutil"
@@ -86,7 +86,7 @@ func ParseRules(data string) (Rules, error) {
 		return Rules{}, probe.Trace(err)
 	}
 
-	rules, err := parseState(state)
+	rules, err := parseRuleState(state)
 	if err != nil {
 		return Rules{}, probe.Trace(err)
 	}
