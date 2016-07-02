@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -50,6 +51,38 @@ func rm(t *testing.T, filename string) {
 	}
 }
 
+func writeMessages(t *testing.T, filename string, m []string) []Marker {
+	var markers []Marker
+	for _, msg := range messages {
+		m := log(t, filename, msg)
+		markers = append(markers, m)
+	}
+
+	return markers
+}
+
+func readRemainingData(t *testing.T, filename string, m Marker) []byte {
+	fd, err := os.Open(filename)
+	if err != nil {
+		t.Fatalf("open(%v): %v", filename, err)
+	}
+
+	if err = m.Seek(fd); err != nil {
+		t.Fatalf("Marker.Seek(): %v", err)
+	}
+
+	buf, err := ioutil.ReadAll(fd)
+	if err != nil {
+		t.Fatalf("read: %v", err)
+	}
+
+	if err = fd.Close(); err != nil {
+		t.Fatalf("close(%v): %v", filename, err)
+	}
+
+	return buf
+}
+
 var messages = []string{
 	"foobar baz message\n",
 	"Jun 30 21:57:10 mopped sudo[19517]: pam_unix(sudo:session): session opened for user root by fd0(uid=0)\n",
@@ -61,12 +94,7 @@ func TestMarker(t *testing.T) {
 	f := tempfile(t)
 	t.Logf("using tempfile %v", f)
 
-	var markers []Marker
-	for _, msg := range messages {
-		m := log(t, f, msg)
-		markers = append(markers, m)
-	}
-
+	markers := writeMessages(t, f, messages)
 	for i, m := range markers {
 		var data []byte
 
@@ -74,23 +102,7 @@ func TestMarker(t *testing.T) {
 			data = append(data, []byte(messages[j])...)
 		}
 
-		fd, err := os.Open(f)
-		if err != nil {
-			t.Fatalf("open(%v): %v", f, err)
-		}
-
-		if err = m.Seek(fd); err != nil {
-			t.Fatalf("Marker.Seek(): %v", err)
-		}
-
-		buf, err := ioutil.ReadAll(fd)
-		if err != nil {
-			t.Fatalf("read: %v", err)
-		}
-
-		if err = fd.Close(); err != nil {
-			t.Fatalf("close(%v): %v", f, err)
-		}
+		buf := readRemainingData(t, f, m)
 
 		if !bytes.Equal(buf, data) {
 			t.Errorf("marker %d returned wrong data, want:\n  %q\ngot:\n  %q", i, data, buf)
@@ -98,4 +110,40 @@ func TestMarker(t *testing.T) {
 	}
 
 	rm(t, f)
+}
+
+func writeFile(t *testing.T, filename string, data []byte) {
+	fd, err := os.Create(filename)
+	if err != nil {
+		t.Fatalf("create() %v", err)
+	}
+
+	_, err = fd.Write(data)
+	if err != nil {
+		t.Fatalf("write() %v", err)
+	}
+
+	if err = fd.Close(); err != nil {
+		t.Fatalf("Close(): %v", err)
+	}
+}
+
+func TestMarkerNewFile(t *testing.T) {
+	f := tempfile(t)
+	t.Logf("using tempfile %v", f)
+
+	markers := writeMessages(t, f, messages)
+	data := []byte(strings.Join(messages, ""))
+
+	rm(t, f)
+	writeFile(t, f, data)
+
+	for i, m := range markers {
+		buf := readRemainingData(t, f, m)
+
+		if !bytes.Equal(buf, data) {
+			t.Errorf("marker %d returned wrong data, want:\n  %q\ngot:\n  %q", i, data, buf)
+		}
+	}
+
 }

@@ -73,6 +73,17 @@ func (m Marker) isNewFile(f *os.File) (bool, error) {
 // Seek moves f to the position of the marker, so that new bytes can be read.
 // When the file has been replaced by a new file, calling Seek() does nothing.
 func (m Marker) Seek(f *os.File) error {
-	_, err := f.Seek(m.Offset, 0)
+	offset := m.Offset
+
+	newFile, err := m.isNewFile(f)
+	if err != nil {
+		return err
+	}
+
+	if newFile {
+		offset = 0
+	}
+
+	_, err = f.Seek(offset, 0)
 	return err
 }
