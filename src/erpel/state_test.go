@@ -141,6 +141,8 @@ func TestMarkerNewFile(t *testing.T) {
 	for i, m := range markers {
 		buf := readRemainingData(t, f, m)
 
+		t.Logf("marker %d: %v", i, m)
+
 		if !bytes.Equal(buf, data) {
 			t.Errorf("marker %d returned wrong data, want:\n  %q\ngot:\n  %q", i, data, buf)
 		}
