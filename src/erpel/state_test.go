@@ -128,6 +128,12 @@ func writeFile(t *testing.T, filename string, data []byte) {
 	}
 }
 
+func mv(t *testing.T, from, to string) {
+	if err := os.Rename(from, to); err != nil {
+		t.Errorf("move %v -> %v failed: %v", from, to, err)
+	}
+}
+
 func TestMarkerNewFile(t *testing.T) {
 	f := tempfile(t)
 	t.Logf("using tempfile %v", f)
@@ -135,7 +141,7 @@ func TestMarkerNewFile(t *testing.T) {
 	markers := writeMessages(t, f, messages)
 	data := []byte(strings.Join(messages, ""))
 
-	rm(t, f)
+	mv(t, f, f+".1")
 	writeFile(t, f, data)
 
 	fi, err := os.Stat(f)
