@@ -138,6 +138,12 @@ func TestMarkerNewFile(t *testing.T) {
 	rm(t, f)
 	writeFile(t, f, data)
 
+	fi, err := os.Stat(f)
+	if err != nil {
+		t.Fatalf("stat(): %v", err)
+	}
+	t.Logf("stat(%v): %#v", f, fi)
+
 	for i, m := range markers {
 		buf := readRemainingData(t, f, m)
 
