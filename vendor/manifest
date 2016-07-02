@@ -14,6 +14,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/spf13/pflag",
+			"repository": "https://github.com/spf13/pflag",
+			"revision": "367864438f1b1a3c7db4da06a2f55b144e6784e0",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/tkrajina/go-reflector/reflector",
 			"repository": "https://github.com/tkrajina/go-reflector",
 			"revision": "fd89736d389b4dfb8e72bf30926a09383f94c6b3",
