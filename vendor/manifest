@@ -8,9 +8,9 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/jessevdk/go-flags",
-			"repository": "https://github.com/jessevdk/go-flags",
-			"revision": "b9b882a3990882b05e02765f5df2cd3ad02874ee",
+			"importpath": "github.com/spf13/cobra",
+			"repository": "https://github.com/spf13/cobra",
+			"revision": "6a8bd97bdb1fc0d08a83459940498ea49d3e8c93",
 			"branch": "master"
 		},
 		{
