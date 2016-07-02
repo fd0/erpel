@@ -9,9 +9,8 @@ import (
 
 // Marker is a position within a file.
 type Marker struct {
-	Filename string `json:"filename"`
-	Inode    uint64 `json:"inode"`
-	Offset   int64  `json:"offset"`
+	Inode  uint64 `json:"inode"`
+	Offset int64  `json:"offset"`
 }
 
 func getInode(f *os.File) (os.FileInfo, uint64, error) {
@@ -41,9 +40,8 @@ func Position(f *os.File) (Marker, error) {
 	}
 
 	m := Marker{
-		Filename: f.Name(),
-		Offset:   pos,
-		Inode:    inode,
+		Offset: pos,
+		Inode:  inode,
 	}
 
 	return m, nil
@@ -73,6 +71,12 @@ func (m Marker) isNewFile(f *os.File) (bool, error) {
 // Seek moves f to the position of the marker, so that new bytes can be read.
 // When the file has been replaced by a new file, calling Seek() does nothing.
 func (m Marker) Seek(f *os.File) error {
+
+	// if this is the null marker, do nothing.
+	if m.Offset == 0 && m.Inode == 0 {
+		return nil
+	}
+
 	offset := m.Offset
 
 	newFile, err := m.isNewFile(f)
