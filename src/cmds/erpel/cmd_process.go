@@ -1,14 +1,13 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"erpel"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -36,8 +35,8 @@ func init() {
 }
 
 func stateFilename(logfile string) string {
-	hash := sha256.Sum256([]byte(logfile))
-	return hex.EncodeToString(hash[:])
+	base := strings.Replace(logfile, string(os.PathSeparator), ".", -1)
+	return base + ".pos"
 }
 
 func loadMarker(logfile string) (m erpel.Marker, err error) {
