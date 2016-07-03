@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/fatih/color",
+			"repository": "https://github.com/fatih/color",
+			"revision": "87d4004f2ab62d0d255e0a38f1680aa534549fe3",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/fd0/probe",
 			"repository": "https://github.com/fd0/probe",
 			"revision": "94b81941524982e014fb96eec0dd764c6b9a04df",
