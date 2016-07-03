@@ -1,0 +1,34 @@
+package config
+
+type erpelParser Peg {
+    State
+}
+
+# this is the entry point to the grammar
+start <- s statements s Section* statements EOF
+
+statements <- (line EOL)* line?
+
+line <- s (Comment / Statement)? s
+
+Section <- SectionName s "{" statements "}" s              { p.setDefaultSection() }
+SectionName <- < Name >                                    { p.newSection(buffer[begin:end]) }
+
+Statement <- Name s '=' s String Comment?                  { p.set(p.name, p.value) }
+
+Name <- < [a-zA-Z0-9-_]+ >                                 { p.name = buffer[begin:end] }
+
+String <- DoubleQuotedString / SingleQuotedString / RawString
+
+SingleQuotedString <- < "'" ( "\\'" / !EOL !"'" . )* "'" > { p.value = buffer[begin:end] }
+DoubleQuotedString <- < '"' ( '\\"' / !EOL !'"' . )* '"' > { p.value = buffer[begin:end] }
+RawString <- < "`" ( !"`" . )* "`" >                       { p.value = buffer[begin:end] }
+
+# comment to the end of the line
+Comment <- s '#' (!EOL .)*
+
+EOF <- !.
+EOL <- [\r\n]
+
+# Space
+s <- [ \t]*
