@@ -62,27 +62,33 @@ Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/
 		rules: Rules{
 			Fields: map[string]Field{
 				"timestamp": Field{
+					Name:     "timestamp",
 					Template: "Jun  2 23:17:13",
 					Pattern:  regexp.MustCompile(`\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}`),
 				},
 				"IP": Field{
+					Name:     "IP",
 					Template: "1.2.3.4",
 					Pattern:  regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
 					Samples:  []string{"192.168.100.1", "2003::feff:1234"},
 				},
 				"msgid": Field{
+					Name:     "msgid",
 					Template: "20160602211704.9125E5A063@localhost",
 					Pattern:  regexp.MustCompile(`[a-zA-Z0-9.=@/-]+`),
 				},
 				"mailaddress": Field{
+					Name:     "mailaddress",
 					Template: "user@host.tld",
 					Pattern:  regexp.MustCompile(`[a-zA-Z0-9_+.-]+@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+`),
 				},
 				"username": Field{
+					Name:     "username",
 					Template: "username@domain.tld",
 					Pattern:  regexp.MustCompile(`[a-zA-Z0-9_+.-]+(@[a-zA-Z0-9_+.-]+\.[a-zA-Z0-9_+.-]+)?`),
 				},
 				"num": Field{
+					Name:     "num",
 					Template: "123",
 					Pattern:  regexp.MustCompile(`\d+`),
 				},

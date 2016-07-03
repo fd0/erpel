@@ -24,6 +24,7 @@ type Rules struct {
 
 // Field is a dynamic section in a log message.
 type Field struct {
+	Name     string
 	Template string
 	Pattern  *regexp.Regexp
 	Samples  []string
@@ -36,10 +37,9 @@ func parseRuleState(state rules.State) (Rules, error) {
 	}
 
 	for name, field := range state.Fields {
-		var (
-			err error
-			f   Field
-		)
+		var err error
+
+		f := Field{Name: name}
 
 		for key, value := range field {
 			switch value[0] {
@@ -147,6 +147,10 @@ func (f *Field) Check() error {
 
 // Equals returns true iff f equals other.
 func (f Field) Equals(other Field) bool {
+	if f.Name != other.Name {
+		return false
+	}
+
 	if f.Template != other.Template {
 		return false
 	}
