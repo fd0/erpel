@@ -7,6 +7,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -22,8 +23,13 @@ The show command parses and visualises a file containing erpel ignore rules.
 	},
 }
 
+// show templates instead of field names
+var displayTemplates bool
+
 func init() {
 	RootCmd.AddCommand(showCmd)
+
+	showCmd.Flags().BoolVarP(&displayTemplates, "templates", "t", false, "show templates instead of field names")
 }
 
 const outputTemplate = `Rules from {{.Filename}}:
@@ -34,6 +40,32 @@ Templates:
 {{end -}}
 
 `
+
+var (
+	printText  = color.New(color.FgWhite).SprintfFunc()
+	printField = color.New(color.FgGreen).SprintfFunc()
+)
+
+func colorPrinter(templates []erpel.RuleView) []string {
+	list := make([]string, 0, len(templates))
+	for _, template := range templates {
+		var s string
+		for _, field := range template {
+			switch f := field.(type) {
+			case erpel.Text:
+				s += printText("%s", f)
+			case erpel.FieldView:
+				if displayTemplates {
+					s += printField("%s", f.S)
+				} else {
+					s += printField("%s", f.F.Name)
+				}
+			}
+		}
+		list = append(list, s)
+	}
+	return list
+}
 
 var tmpl = template.Must(template.New("output").Parse(outputTemplate))
 
@@ -60,10 +92,10 @@ func ShowRules(wr io.Writer, args []string) error {
 
 	data := struct {
 		Filename  string
-		Templates []erpel.RuleView
+		Templates []string
 	}{
 		filename,
-		rules.Views(),
+		colorPrinter(rules.Views()),
 	}
 
 	tmpl.Execute(wr, data)
