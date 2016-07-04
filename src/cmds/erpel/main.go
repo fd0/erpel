@@ -17,8 +17,9 @@ prints the remaining messages. It detects whether or not a log message should
 be ignored by applying a list of patterns, effectively "blacklisting" known log
 messages that can safely be ignored.
 `,
-	SilenceErrors: true,
-	SilenceUsage:  true,
+	SilenceErrors:     true,
+	SilenceUsage:      true,
+	PersistentPreRunE: parseConfig,
 }
 
 func main() {
