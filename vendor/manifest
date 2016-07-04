@@ -2,6 +2,12 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/BurntSushi/xdg",
+			"repository": "https://github.com/BurntSushi/xdg",
+			"revision": "e80d3446fea190e21fbd294569844f066e47ccfc",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/fatih/color",
 			"repository": "https://github.com/fatih/color",
 			"revision": "87d4004f2ab62d0d255e0a38f1680aa534549fe3",
