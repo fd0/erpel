@@ -110,7 +110,7 @@ func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 	}
 
 	for _, s := range r.Templates {
-		s = "^" + r.Prefix + regexp.QuoteMeta(s) + "$"
+		s = "^" + regexp.QuoteMeta(r.Prefix) + regexp.QuoteMeta(s) + "$"
 
 		// apply local fields first
 		for _, field := range r.Fields {
