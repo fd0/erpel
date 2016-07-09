@@ -239,6 +239,10 @@ func ParseAllRulesFiles(global map[string]Field, dir string) (rules []Rules, err
 	}
 
 	for _, file := range matches {
+		if strings.HasPrefix(filepath.Base(file), ".") {
+			continue
+		}
+
 		r, err := ParseRulesFile(global, file)
 		if err != nil {
 			return nil, probe.Trace(err, file)
