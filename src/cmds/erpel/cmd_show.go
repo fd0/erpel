@@ -21,13 +21,19 @@ The show command parses and visualises a file containing erpel ignore rules.
 	},
 }
 
-// show templates instead of field names
-var displayTemplates bool
+var (
+	// show templates instead of field names
+	displayTemplates bool
+
+	// do not check against the rule samples
+	ignoreRuleSamples bool
+)
 
 func init() {
 	RootCmd.AddCommand(showCmd)
 
 	showCmd.Flags().BoolVarP(&displayTemplates, "templates", "t", false, "show templates instead of field names")
+	showCmd.Flags().BoolVarP(&ignoreRuleSamples, "ignore-samples", "I", false, "do not run check against rule samples")
 }
 
 var (
@@ -53,8 +59,10 @@ func ShowRules(args []string) error {
 		return err
 	}
 
-	if err = rules.Check(); err != nil {
-		return err
+	if !ignoreRuleSamples {
+		if err = rules.Check(); err != nil {
+			return err
+		}
 	}
 
 	fmt.Printf("Rules from %v:\n", filename)
