@@ -31,7 +31,13 @@ var stateDir string
 
 func init() {
 	RootCmd.AddCommand(processCmd)
-	processCmd.PersistentFlags().StringVarP(&stateDir, "state-dir", "s", "/var/lib/erpel", "set the directory for keeping log file positions")
+	flags := processCmd.PersistentFlags()
+
+	flags.StringVarP(&stateDir, "state-dir", "s", "/var/lib/erpel", "set the directory for keeping log file positions")
+	bindConfigValue("state_dir", flags.Lookup("state-dir"))
+
+	flags.StringVarP(&rulesDir, "rules", "r", "/etc/erpel/rules.d", "load rules from this directory")
+	bindConfigValue("rules_dir", flags.Lookup("rules"))
 }
 
 func stateFilename(logfile string) string {

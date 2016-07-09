@@ -6,6 +6,7 @@ import (
 
 	"github.com/BurntSushi/xdg"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 var configFile string
@@ -19,7 +20,7 @@ func init() {
 
 const configFileName = "erpel.conf"
 
-var globalFields map[string]erpel.Field
+var cfg erpel.Config
 
 // initConfig parses the configuration file.
 func initConfig() {
@@ -42,12 +43,28 @@ func parseConfig(cmd *cobra.Command, args []string) error {
 
 	V("load config file %q\n", configFile)
 
-	cfg, err := erpel.ParseConfigFile(configFile)
+	c, err := erpel.ParseConfigFile(configFile)
 	if err != nil {
 		return fmt.Errorf("parse config file %v failed: %v", configFile, err)
 	}
 
-	globalFields = cfg.Fields
+	cfg = c
+
+	if cfg.RulesDir != "" {
+		if f, ok := configBinds["rules_dir"]; ok {
+			f.Value.Set(cfg.RulesDir)
+		}
+	}
 
 	return nil
+}
+
+var configBinds map[string]*pflag.Flag
+
+func bindConfigValue(name string, flag *pflag.Flag) {
+	if configBinds == nil {
+		configBinds = make(map[string]*pflag.Flag)
+	}
+
+	configBinds[name] = flag
 }
