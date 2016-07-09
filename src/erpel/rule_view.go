@@ -69,7 +69,7 @@ func applyField(field Field, data RuleView, global bool) (result RuleView) {
 
 // View renders a template into a RuleView by applying the rules.
 func View(rules Rules, template string) RuleView {
-	data := RuleView{Text(template)}
+	data := RuleView{Text(rules.Prefix + template)}
 
 	for _, field := range rules.Fields {
 		data = applyField(field, data, false)
