@@ -74,9 +74,18 @@ func parseRuleState(global map[string]Field, state rules.State) (r Rules, err er
 		GlobalFields: global,
 	}
 
-	rules.Prefix, err = unquoteString(state.Options["prefix"])
-	if err != nil {
-		return Rules{}, err
+	for key, value := range state.Options {
+		v, err := unquoteString(value)
+		if err != nil {
+			return Rules{}, probe.Trace(err, value)
+		}
+
+		switch key {
+		case "prefix":
+			rules.Prefix = v
+		default:
+			return Rules{}, probe.Trace(fmt.Errorf("unknown key %q in config", key))
+		}
 	}
 
 	for name, field := range state.Fields {
