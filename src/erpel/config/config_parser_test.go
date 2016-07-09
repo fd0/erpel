@@ -334,18 +334,18 @@ var testConfigs = []struct {
 	{
 		cfg: `
 		key1 = "value1"
-	field f1 {
-	a = "1"
-	b = '2'
-	}
+		field f1 {
+			a = "1"
+			b = '2'
+		}
 
 		key2 = "value2"
-	field f2 {
-	x = "y"
-	y = '..-..'
-	z = "foobar"
-	} # comment
-	`,
+		field f2 {
+			x = "y"
+			y = '..-..'
+			z = "foobar"
+		} # comment
+		`,
 		state: State{
 			Global: map[string]string{
 				"key1": `"value1"`,
