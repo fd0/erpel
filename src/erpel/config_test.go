@@ -16,10 +16,15 @@ var testConfigFiles = []struct {
 		data: `
 # load ignore rules from all files in this directory
 rules_dir = "/etc/erpel/rules.d"
+
+state_dir = '/foo'
 `,
 		cfg: Config{
-			RulesDir: "/etc/erpel/rules.d",
-			Fields:   map[string]Field{},
+			Options: map[string]string{
+				"rules_dir": "/etc/erpel/rules.d",
+				"state_dir": "/foo",
+			},
+			Fields: map[string]Field{},
 		},
 	},
 	{
@@ -39,7 +44,9 @@ field IP {
 }
 `,
 		cfg: Config{
-			RulesDir: "/etc/erpel/rules.d",
+			Options: map[string]string{
+				"rules_dir": "/etc/erpel/rules.d",
+			},
 			Fields: map[string]Field{
 				"timestamp": Field{
 					Name:     "timestamp",
@@ -57,6 +64,34 @@ field IP {
 	},
 }
 
+func equalMap(t testing.TB, name string, want map[string]string, got map[string]string) {
+	var keys []string
+	for key := range want {
+		keys = append(keys, key)
+	}
+	for key := range got {
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		v1, ok := want[key]
+		if !ok {
+			t.Errorf("%v: extra key %v found\n", name, key)
+			continue
+		}
+
+		v2, ok := got[key]
+		if !ok {
+			t.Errorf("%v: missing key %v\n", name, key)
+			continue
+		}
+
+		if v1 != v2 {
+			t.Errorf("%v: values are not equal, want %q, got %q", name, v1, v2)
+		}
+	}
+}
+
 func TestParseConfig(t *testing.T) {
 	for i, test := range testConfigFiles {
 		cfg, err := ParseConfig(test.data)
@@ -65,9 +100,7 @@ func TestParseConfig(t *testing.T) {
 			continue
 		}
 
-		if cfg.RulesDir != test.cfg.RulesDir {
-			t.Errorf("rules_dir is incorrect, want %v, got %v", test.cfg.RulesDir, cfg.RulesDir)
-		}
+		equalMap(t, "config", test.cfg.Options, cfg.Options)
 
 		var fields []string
 		for name := range test.cfg.Fields {

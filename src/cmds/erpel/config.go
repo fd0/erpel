@@ -50,9 +50,9 @@ func parseConfig(cmd *cobra.Command, args []string) error {
 
 	cfg = c
 
-	if cfg.RulesDir != "" {
-		if f, ok := configBinds["rules_dir"]; ok {
-			f.Value.Set(cfg.RulesDir)
+	for name, value := range cfg.Options {
+		if f, ok := configBinds[name]; ok && !f.Changed {
+			f.Value.Set(value)
 		}
 	}
 

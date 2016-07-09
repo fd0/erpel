@@ -15,9 +15,13 @@ import (
 
 // Config holds all information parsed from a configuration file.
 type Config struct {
-	RulesDir string `name:"rules_dir"`
+	Options map[string]string
+	Fields  map[string]Field
+}
 
-	Fields map[string]Field
+var validOptions = map[string]struct{}{
+	"rules_dir": struct{}{},
+	"state_dir": struct{}{},
 }
 
 // fieldForName returns the field matching the name, either directly (via
@@ -112,7 +116,8 @@ func compileRegexp(data map[string]string) (map[string]*regexp.Regexp, error) {
 // parseState returns a Config struct from a state.
 func parseState(state config.State) (c Config, err error) {
 	cfg := Config{
-		Fields: make(map[string]Field),
+		Options: make(map[string]string),
+		Fields:  make(map[string]Field),
 	}
 
 	for name, value := range state.Fields {
@@ -124,15 +129,15 @@ func parseState(state config.State) (c Config, err error) {
 	}
 
 	for name, value := range state.Global {
-		switch name {
-		case "rules_dir":
-			cfg.RulesDir, err = unquoteString(value)
-			if err != nil {
-				return c, probe.Trace(err, value)
-			}
-		default:
+		if _, ok := validOptions[name]; !ok {
 			return c, probe.Trace(fmt.Errorf("unknown configuration option %q", name))
 		}
+
+		s, err := unquoteString(value)
+		if err != nil {
+			return c, probe.Trace(err, value)
+		}
+		cfg.Options[name] = s
 	}
 
 	return cfg, nil
