@@ -16,6 +16,8 @@ import (
 // Config holds all information parsed from a configuration file.
 type Config struct {
 	RulesDir string `name:"rules_dir"`
+
+	Fields map[string]Field
 }
 
 // fieldForName returns the field matching the name, either directly (via
@@ -108,20 +110,28 @@ func compileRegexp(data map[string]string) (map[string]*regexp.Regexp, error) {
 }
 
 // parseState returns a Config struct from a state.
-func parseState(state config.State) (Config, error) {
-	cfg := Config{}
+func parseState(state config.State) (c Config, err error) {
+	cfg := Config{
+		Fields: make(map[string]Field),
+	}
 
-	for name, data := range state.Sections {
-		var err error
-		switch name {
-		case "":
-			err = apply(data, "name", &cfg)
-		default:
-			err = fmt.Errorf("unknown section %v", name)
-		}
-
+	for name, value := range state.Fields {
+		f, err := parseField(name, value)
 		if err != nil {
-			return Config{}, probe.Trace(err, name)
+			return c, probe.Trace(err)
+		}
+		cfg.Fields[name] = f
+	}
+
+	for name, value := range state.Global {
+		switch name {
+		case "rules_dir":
+			cfg.RulesDir, err = unquoteString(value)
+			if err != nil {
+				return c, probe.Trace(err, value)
+			}
+		default:
+			return c, probe.Trace(fmt.Errorf("unknown configuration option %q", name))
 		}
 	}
 

@@ -19,6 +19,7 @@ rules_dir = "/etc/erpel/rules.d"
 `,
 		cfg: Config{
 			RulesDir: "/etc/erpel/rules.d",
+			Fields:   map[string]Field{},
 		},
 	},
 }

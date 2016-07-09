@@ -30,6 +30,40 @@ type Field struct {
 	Samples  []string
 }
 
+func parseField(name string, field rules.Field) (f Field, err error) {
+	f = Field{Name: name}
+
+	for key, value := range field {
+		switch value[0] {
+		case '"', '\'', '`':
+			value, err = unquoteString(value)
+			if err != nil {
+				return f, probe.Trace(err, value)
+			}
+		}
+
+		switch key {
+		case "pattern":
+			r, err := regexp.Compile(value)
+			if err != nil {
+				return f, probe.Trace(err, value)
+			}
+			f.Pattern = r
+		case "template":
+			f.Template = value
+		case "samples":
+			f.Samples, err = unquoteList(value)
+			if err != nil {
+				return f, probe.Trace(err, value)
+			}
+		default:
+			return f, probe.Trace(fmt.Errorf("unknown key %q in field %q", key, name))
+		}
+	}
+
+	return f, f.Check()
+}
+
 // parseRuleState returns a Rules from a state.
 func parseRuleState(state rules.State) (Rules, error) {
 	rules := Rules{
@@ -37,39 +71,8 @@ func parseRuleState(state rules.State) (Rules, error) {
 	}
 
 	for name, field := range state.Fields {
-		var err error
-
-		f := Field{Name: name}
-
-		for key, value := range field {
-			switch value[0] {
-			case '"', '\'', '`':
-				value, err = unquoteString(value)
-				if err != nil {
-					return Rules{}, probe.Trace(err, value)
-				}
-			}
-
-			switch key {
-			case "pattern":
-				r, err := regexp.Compile(value)
-				if err != nil {
-					return Rules{}, probe.Trace(err, value)
-				}
-				f.Pattern = r
-			case "template":
-				f.Template = value
-			case "samples":
-				f.Samples, err = unquoteList(value)
-				if err != nil {
-					return Rules{}, probe.Trace(err, value)
-				}
-			default:
-				return Rules{}, probe.Trace(fmt.Errorf("unknown key %q in field %q", key, name))
-			}
-		}
-
-		if err := f.Check(); err != nil {
+		f, err := parseField(name, field)
+		if err != nil {
 			return Rules{}, probe.Trace(err, name, f)
 		}
 
