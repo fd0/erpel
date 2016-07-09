@@ -27,8 +27,12 @@ prints those log messages that do not match any of the process rules.
 	},
 }
 
-var stateDir string
-var rulesDir string
+var (
+	stateDir      string
+	rulesDir      string
+	ignoreState   bool
+	noUpdateState bool
+)
 
 func init() {
 	RootCmd.AddCommand(processCmd)
@@ -39,6 +43,9 @@ func init() {
 
 	flags.StringVarP(&rulesDir, "rules", "r", "/etc/erpel/rules.d", "load rules from this directory")
 	bindConfigValue("rules_dir", flags.Lookup("rules"))
+
+	flags.BoolVarP(&ignoreState, "ignore-state", "i", false, "ignore the state and process the files from the start")
+	flags.BoolVarP(&noUpdateState, "no-update-state", "n", false, "do not update the state")
 }
 
 func stateFilename(logfile string) string {
@@ -103,9 +110,16 @@ func Process(cmd *cobra.Command, args []string) error {
 	for _, logfile := range args {
 		V("processing log file %v\n", logfile)
 
-		last, err := loadMarker(logfile)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "error loading marker for %v: %v\n", logfile, err)
+		var (
+			last erpel.Marker
+			err  error
+		)
+
+		if !ignoreState {
+			last, err = loadMarker(logfile)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error loading marker for %v: %v\n", logfile, err)
+			}
 		}
 
 		pos, err := erpel.ProcessFile(Rules, logfile, last, func(lines []string) error {
@@ -119,8 +133,10 @@ func Process(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if err = saveMarker(logfile, pos); err != nil {
-			fmt.Fprintf(os.Stderr, "error saving marker for %v: %v\n", logfile, err)
+		if !noUpdateState {
+			if err = saveMarker(logfile, pos); err != nil {
+				fmt.Fprintf(os.Stderr, "error saving marker for %v: %v\n", logfile, err)
+			}
 		}
 	}
 
