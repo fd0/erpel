@@ -28,6 +28,7 @@ prints those log messages that do not match any of the process rules.
 }
 
 var stateDir string
+var rulesDir string
 
 func init() {
 	RootCmd.AddCommand(processCmd)
