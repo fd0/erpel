@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	erpelRules "erpel/rules"
+	"testing"
+)
 
 var testConfigs = []struct {
 	cfg   string
@@ -9,80 +12,70 @@ var testConfigs = []struct {
 	{
 		cfg: ``,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{},
-			},
+			Global: map[string]string{},
 		},
 	},
 	{
 		cfg: `afoo=  ''  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{"afoo": "''"},
+			Global: map[string]string{
+				"afoo": "''",
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar baz  quux`  ",
 		state: State{
-			Sections: map[string]Section{
-				"": Section{"foo": "`bar baz  quux`"},
+			Global: map[string]string{
+				"foo": "`bar baz  quux`",
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar'\" baz quux`  ",
 		state: State{
-			Sections: map[string]Section{
-				"": Section{"foo": "`bar'\" baz quux`"},
+			Global: map[string]string{
+				"foo": "`bar'\" baz quux`",
 			},
 		},
 	},
 	{
 		cfg: "foo= `bar\nbaz\t\nquux`  ",
 		state: State{
-			Sections: map[string]Section{
-				"": Section{"foo": "`bar\nbaz\t\nquux`"},
+			Global: map[string]string{
+				"foo": "`bar\nbaz\t\nquux`",
 			},
 		},
 	},
 	{
 		cfg: `a="b"`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"a": `"b"`,
-				},
+			Global: map[string]string{
+				"a": `"b"`,
 			},
 		},
 	},
 	{
 		cfg: `a ="b"  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"a": `"b"`,
-				},
+			Global: map[string]string{
+				"a": `"b"`,
 			},
 		},
 	},
 	{
 		cfg: `  x = 'y'`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"x": "'y'",
-				},
+			Global: map[string]string{
+				"x": "'y'",
 			},
 		},
 	},
 	{
 		cfg: `a    = 'b='`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"a": "'b='",
-				},
+			Global: map[string]string{
+				"a": "'b='",
 			},
 		},
 	},
@@ -92,11 +85,9 @@ var testConfigs = []struct {
 			baz= 'bumppp'
 			`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"foo": `"bar"`,
-					"baz": "'bumppp'",
-				},
+			Global: map[string]string{
+				"foo": `"bar"`,
+				"baz": "'bumppp'",
 			},
 		},
 	},
@@ -106,21 +97,17 @@ var testConfigs = []struct {
 		baz= "bumppp"
 			`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"foo": `"bar"`,
-					"baz": `"bumppp"`,
-				},
+			Global: map[string]string{
+				"foo": `"bar"`,
+				"baz": `"bumppp"`,
 			},
 		},
 	},
 	{
 		cfg: ` foo = "bar baz" `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"foo": `"bar baz"`,
-				},
+			Global: map[string]string{
+				"foo": `"bar baz"`,
 			},
 		},
 	},
@@ -132,13 +119,11 @@ var testConfigs = []struct {
 		zz="3"
 		key ="Value!   "`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"xx":  "'1'",
-					"yy":  `"2 a oesu saoe ustha osenuthh"`,
-					"key": `"Value!   "`,
-					"zz":  `"3"`,
-				},
+			Global: map[string]string{
+				"xx":  "'1'",
+				"yy":  `"2 a oesu saoe ustha osenuthh"`,
+				"key": `"Value!   "`,
+				"zz":  `"3"`,
 			},
 		},
 	},
@@ -146,71 +131,57 @@ var testConfigs = []struct {
 		cfg: `foo='bar'
 		test = "foobar"`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"foo":  "'bar'",
-					"test": `"foobar"`,
-				},
+			Global: map[string]string{
+				"foo":  "'bar'",
+				"test": `"foobar"`,
 			},
 		},
 	},
 	{
 		cfg: `test = "foobar"`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"test": `"foobar"`,
-				},
+			Global: map[string]string{
+				"test": `"foobar"`,
 			},
 		},
 	},
 	{
 		cfg: `test = "foo\nb\"ar"`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"test": `"foo\nb\"ar"`,
-				},
+			Global: map[string]string{
+				"test": `"foo\nb\"ar"`,
 			},
 		},
 	},
 	{
 		cfg: `test = '  foo bar'  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"test": `'  foo bar'`,
-				},
+			Global: map[string]string{
+				"test": `'  foo bar'`,
 			},
 		},
 	},
 	{
 		cfg: `test = '  foo \'bar'  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"test": `'  foo \'bar'`,
-				},
+			Global: map[string]string{
+				"test": `'  foo \'bar'`,
 			},
 		},
 	},
 	{
 		cfg: `Foo-baR_ = "xxy"  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"Foo-baR_": `"xxy"`,
-				},
+			Global: map[string]string{
+				"Foo-baR_": `"xxy"`,
 			},
 		},
 	},
 	{
 		cfg: `Foo_baR = "xxy"  `,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"Foo_baR": `"xxy"`,
-				},
+			Global: map[string]string{
+				"Foo_baR": `"xxy"`,
 			},
 		},
 	},
@@ -220,62 +191,10 @@ var testConfigs = []struct {
 	# comment
 	x =   "y! "`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"foo":  `"bar"`,
-					"test": `"foobar"`,
-					"x":    `"y! "`,
-				},
-			},
-		},
-	},
-	{
-		cfg: `foo{}`,
-		state: State{
-			Sections: map[string]Section{
-				"":    Section{},
-				"foo": Section{},
-			},
-		},
-	},
-	{
-		cfg: `foo {
-			bar_2 = 'baz'
-			quux = 'fump'
-		}`,
-		state: State{
-			Sections: map[string]Section{
-				"": Section{},
-				"foo": Section{
-					"bar_2": "'baz'",
-					"quux":  "'fump'",
-				},
-			},
-		},
-	},
-	{
-		cfg: `foo {
-		}
-
-		# bit of space after the section
-
-		`,
-		state: State{
-			Sections: map[string]Section{
-				"":    Section{},
-				"foo": Section{},
-			},
-		},
-	},
-	{
-		cfg: `foo {bar = 'baz'
-		}`,
-		state: State{
-			Sections: map[string]Section{
-				"": Section{},
-				"foo": Section{
-					"bar": "'baz'",
-				},
+			Global: map[string]string{
+				"foo":  `"bar"`,
+				"test": `"foobar"`,
+				"x":    `"y! "`,
 			},
 		},
 	},
@@ -285,97 +204,269 @@ var testConfigs = []struct {
 		# comment
 		name_With_chars = "x"
 
-		foo {
-			bar = "baz"
-			other_var = 'config' # comment after value
-		}`,
+		`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"before":          "'foobar Test'",
-					"name_With_chars": `"x"`,
-				},
-				"foo": Section{
-					"bar":       `"baz"`,
-					"other_var": "'config'",
-				},
+			Global: map[string]string{
+				"before":          "'foobar Test'",
+				"name_With_chars": `"x"`,
 			},
 		},
 	},
 	{
 		cfg: `global_setting1 = "value1"
-glob_set2 = "foobar"
-# comment
-x =   "y! "
+	glob_set2 = "foobar"
+	# comment
+	x =   "y! "
 
-# introduce another section
-local_rules {
-	loc_set1 = 'v1'
-	loc_set2 = "this is just a test"
-}
-
-other_global_vars = 'X'
+	other_global_vars = 'X'
 
 	`,
 		state: State{
-			Sections: map[string]Section{
-				"": Section{
-					"global_setting1":   `"value1"`,
-					"glob_set2":         `"foobar"`,
-					"x":                 `"y! "`,
-					"other_global_vars": "'X'",
-				},
-				"local_rules": Section{
-					"loc_set1": "'v1'",
-					"loc_set2": `"this is just a test"`,
+			Global: map[string]string{
+				"global_setting1":   `"value1"`,
+				"glob_set2":         `"foobar"`,
+				"x":                 `"y! "`,
+				"other_global_vars": "'X'",
+			},
+		},
+	},
+	{
+		cfg: ``,
+		state: State{
+			Fields: map[string]erpelRules.Field{},
+		},
+	},
+	{
+		cfg: `# comment, nothing more`,
+		state: State{
+			Fields: map[string]erpelRules.Field{},
+		},
+	},
+	{
+		cfg: `field foo {}`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"foo": erpelRules.Field{},
+			},
+		},
+	},
+	{
+		cfg: `field foo {
+	x = "y"
+	}`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"foo": erpelRules.Field{
+					"x": `"y"`,
 				},
 			},
 		},
 	},
+	{
+		cfg: `field foo {
+	x = "y"
+	samples = ["a", 'b', 'xxxx']
+	}`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"foo": erpelRules.Field{
+					"x":       `"y"`,
+					"samples": `["a", 'b', 'xxxx']`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `# comment field
+	field foo {
+	x = "y" # or else
+	} #another comment
+
+	# and another
+	`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"foo": erpelRules.Field{
+					"x": `"y"`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `field f1 { x = "y" }`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"f1": erpelRules.Field{
+					"x": `"y"`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `field f1 {
+			a = "1"
+			b = '2'
+	}`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"f1": erpelRules.Field{
+					"a": `"1"`,
+					"b": `'2'`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `
+	field f1 {
+	a = "1"
+	b = '2'
+	}`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"f1": erpelRules.Field{
+					"a": `"1"`,
+					"b": `'2'`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `
+		key1 = "value1"
+	field f1 {
+	a = "1"
+	b = '2'
+	}
+
+		key2 = "value2"
+	field f2 {
+	x = "y"
+	y = '..-..'
+	z = "foobar"
+	} # comment
+	`,
+		state: State{
+			Global: map[string]string{
+				"key1": `"value1"`,
+				"key2": `"value2"`,
+			},
+			Fields: map[string]erpelRules.Field{
+				"f1": erpelRules.Field{
+					"a": `"1"`,
+					"b": `'2'`,
+				},
+				"f2": erpelRules.Field{
+					"x": `"y"`,
+					"y": `'..-..'`,
+					"z": `"foobar"`,
+				},
+			},
+		},
+	},
+	{
+		cfg: `
+	# this config file has no Fields
+	`,
+		state: State{
+			Fields: map[string]erpelRules.Field{},
+		},
+	},
+	{
+		cfg: `
+		# this config is complete
+		field f1 {
+			a = "1"
+			b = '2'
+		}
+
+		field f2 {
+			x = "y"
+			y = '..-..'
+			z = "foobar"
+		} # comment
+	`,
+		state: State{
+			Fields: map[string]erpelRules.Field{
+				"f1": erpelRules.Field{
+					"a": `"1"`,
+					"b": `'2'`,
+				},
+				"f2": erpelRules.Field{
+					"x": `"y"`,
+					"y": `'..-..'`,
+					"z": `"foobar"`,
+				},
+			},
+		},
+	},
+}
+
+func equalMap(t testing.TB, name string, want map[string]string, got map[string]string) {
+	var keys []string
+	for key := range want {
+		keys = append(keys, key)
+	}
+	for key := range got {
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		v1, ok := want[key]
+		if !ok {
+			t.Errorf("%v: extra key %v found\n", name, key)
+			continue
+		}
+
+		v2, ok := got[key]
+		if !ok {
+			t.Errorf("%v: missing key %v\n", name, key)
+			continue
+		}
+
+		if v1 != v2 {
+			t.Errorf("%v: values are not equal, want %v, got %v", name, v1, v2)
+		}
+	}
+}
+
+func equalFields(t testing.TB, want map[string]erpelRules.Field, got map[string]erpelRules.Field) {
+	var keys []string
+	for key := range want {
+		keys = append(keys, key)
+	}
+	for key := range got {
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		v1, ok := want[key]
+		if !ok {
+			t.Errorf("extra key %v found\n", key)
+			continue
+		}
+
+		v2, ok := got[key]
+		if !ok {
+			t.Errorf("missing key %v\n", key)
+			continue
+		}
+
+		equalMap(t, "Field "+key, v1, v2)
+	}
 }
 
 func TestParseConfig(t *testing.T) {
 	for i, test := range testConfigs {
 		state, err := Parse(test.cfg)
 		if err != nil {
-			t.Errorf("config %d: failed to parse: %v", i, err)
+			// t.Errorf("config %d: failed to parse: %v", i, err)
+			t.Fatalf("config %d: failed to parse: %v", i, err)
 			continue
 		}
 
-		for secName, section := range test.state.Sections {
-			// t.Logf("test %v: got Sections:\n%#v", i, state.Sections)
-
-			sec, ok := state.Sections[secName]
-			if !ok {
-				t.Errorf("test %v: section %q not found in parsed result", i, secName)
-				continue
-			}
-
-			for key, v1 := range section {
-				v2, ok := sec[key]
-				if !ok {
-					t.Errorf("test %v: missing statement %q in state parsed from config", i, key)
-					continue
-				}
-
-				if v1 != v2 {
-					t.Errorf("test %v: wrong value for %q: want %q, got %q", i, key, v1, v2)
-				}
-			}
-
-			for key, value := range sec {
-				if _, ok := section[key]; !ok {
-					t.Errorf("test %v: unexpected statement %q found in section %q (value is %q)", i, key, secName, value)
-				}
-			}
-		}
-
-		for secName := range state.Sections {
-			_, ok := test.state.Sections[secName]
-			if !ok {
-				t.Errorf("test %v: unexpected section %q found in parsed result", i, secName)
-			}
-		}
+		equalMap(t, "globals", test.state.Global, state.Global)
+		equalFields(t, test.state.Fields, state.Fields)
 	}
 }
 
@@ -392,6 +483,67 @@ func TestParseInvalidConfig(t *testing.T) {
 		_, err := Parse(cfg)
 		if err == nil {
 			t.Errorf("config %d: expected error for invalid config not found, config:\n%q", i, cfg)
+			continue
+		}
+	}
+}
+
+var testDebugConfigs = []string{
+	"",
+	"foo='bar'\n",
+	"foo='bar'",
+	"foo = 'bar'",
+	"foo = 'bar' # comment text",
+	"\n",
+	`foo = 'bar'
+	baz= "bump"`,
+	`
+	foo = "foo"
+	bar = "baz" #comment
+	`,
+	`
+foo = "bar"
+field test { }
+	`,
+	`
+foo = "bar"
+field test {
+# comment
+}
+	`,
+	`
+	foo = "bar"
+	field test {
+		# comment
+		foo = 'baz'
+	}
+	`,
+	`# comment field
+field foo {
+	x = "y" # or else
+} #another comment
+
+# and another
+`,
+	`
+# this config is complete
+field f1 {
+	a = "1"
+	b = '2'
+}
+
+field f2 {
+	x = "y"
+	y = '..-..'
+	z = "foobar"
+} # comment`,
+}
+
+func TestDebugConfigParser(t *testing.T) {
+	for i, cfg := range testDebugConfigs {
+		_, err := Parse(cfg)
+		if err != nil {
+			t.Fatalf("config %d: failed to parse: %v", i, err)
 			continue
 		}
 	}

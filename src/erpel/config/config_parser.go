@@ -2,6 +2,7 @@
 package config
 
 import (
+	erpelRules "erpel/rules"
 	"strings"
 
 	"github.com/fd0/probe"
@@ -13,43 +14,51 @@ import (
 type State struct {
 	// used to temporarily store values while parsing
 	name, value string
+	inField     bool
 
-	currentSection Section
+	// global configuration statements
+	Global map[string]string
 
-	// collection of all statements encountered during parsing
-	Sections map[string]Section
+	currentField erpelRules.Field
+
+	// collection of all fields encountered during parsing
+	Fields map[string]erpelRules.Field
 }
 
-// Section contains statements within a section.
-type Section map[string]string
+func (c *State) setGlobal(key, value string) {
+	key = strings.TrimSpace(key)
+	value = strings.TrimSpace(value)
+	c.Global[key] = value
+}
 
-func (c *State) newSection(name string) {
+func (c *State) newField(name string) {
 	name = strings.TrimSpace(name)
-	sec := make(Section)
-	c.Sections[name] = sec
-	c.currentSection = sec
+	f := make(erpelRules.Field)
+	c.Fields[name] = f
+	c.currentField = f
 }
 
-func (c *State) setDefaultSection() {
-	c.currentSection = c.Sections[""]
+func (c *State) setField(key, value string) {
+	key = strings.TrimSpace(key)
+	value = strings.TrimSpace(value)
+	c.currentField[key] = value
 }
 
 func (c *State) set(key, value string) {
-	key = strings.TrimSpace(key)
-	value = strings.TrimSpace(value)
-	c.currentSection[key] = value
+	if c.inField {
+		c.setField(key, value)
+		return
+	}
+
+	c.setGlobal(key, value)
 }
 
 // Parse returns the state for a configuration.
 func Parse(data string) (State, error) {
-	defaultSection := make(Section)
-	sections := make(map[string]Section)
-	sections[""] = defaultSection
-
 	c := &erpelParser{
 		State: State{
-			currentSection: defaultSection,
-			Sections:       sections,
+			Fields: make(map[string]erpelRules.Field),
+			Global: make(map[string]string),
 		},
 		Buffer: data,
 	}
@@ -57,6 +66,7 @@ func Parse(data string) (State, error) {
 	c.Init()
 	err := c.Parse()
 	if err != nil {
+		// c.PrintSyntaxTree()
 		return State{}, probe.Trace(err, data)
 	}
 	c.Execute()
