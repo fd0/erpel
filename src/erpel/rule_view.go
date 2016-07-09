@@ -18,15 +18,20 @@ func (t Text) String() string {
 
 // FieldView is used within a RuleView for a field.
 type FieldView struct {
-	S string
-	F Field
+	S      string
+	F      Field
+	Global bool
 }
 
 func (fv FieldView) String() string {
+	if fv.Global {
+		return "{" + fv.F.Name + "}"
+	}
+
 	return "[" + fv.F.Name + "]"
 }
 
-func applyField(field Field, data RuleView) (result RuleView) {
+func applyField(field Field, data RuleView, global bool) (result RuleView) {
 	for _, item := range data {
 		str, ok := item.(Text)
 		if !ok {
@@ -49,7 +54,7 @@ func applyField(field Field, data RuleView) (result RuleView) {
 				// Otherwise, append the string to result.
 				result = append(result, Text(s))
 			}
-			result = append(result, FieldView{S: field.Template, F: field})
+			result = append(result, FieldView{S: field.Template, F: field, Global: global})
 		}
 
 		last := matches[l-1]
@@ -67,11 +72,11 @@ func View(rules Rules, template string) RuleView {
 	data := RuleView{Text(template)}
 
 	for _, field := range rules.Fields {
-		data = applyField(field, data)
+		data = applyField(field, data, false)
 	}
 
 	for _, field := range rules.GlobalFields {
-		data = applyField(field, data)
+		data = applyField(field, data, true)
 	}
 
 	return data

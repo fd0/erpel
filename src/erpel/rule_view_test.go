@@ -58,7 +58,7 @@ var ruleViewTests = []struct {
 	{
 		template: "Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'",
 		result: []string{
-			"[timestamp]",
+			"{timestamp}",
 			" mail dovecot: lda(",
 			"[mailaddress]",
 			"): sieve: msgid=<",
@@ -69,7 +69,7 @@ var ruleViewTests = []struct {
 	{
 		template: "Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123",
 		result: []string{
-			"[timestamp]",
+			"{timestamp}",
 			" mail dovecot: IMAP(",
 			"[username]",
 			"): Disconnected: Logged out bytes=",
