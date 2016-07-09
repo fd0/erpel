@@ -1,25 +1,8 @@
 # The first section lists fields that are to be replaced in the sample messages
 # below.
 
-# A field consists of a name and a template (to insert the field).
-field timestamp {
-    template = 'Jun  2 23:17:13'
-    pattern = '\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}'
-}
-
-# A field can also list examples, these must match the defined pattern.
-field IP {
-    template = '1.2.3.4'
-    # this matches IPv4 and IPv6 addresses
-    pattern = '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})'
-
-    samples = ['192.168.100.1', '2003::feff:1234']
-}
-
-field hostname {
-    template = 'mail'
-    pattern = '\w+'
-}
+# all template messages below are prefixed with the following string (in addition to the global prefix from erpel.conf)
+prefix = "Jan  1 11:22:33 mail dovecot: "
 
 field mailaddress {
     template = 'user@domain.tld'
@@ -54,17 +37,17 @@ field session {
 ---
 
 # This section lists the templates. In each line, the templates from the fields above are applied to mark the dynamic parts of a line.
-Jun  2 23:17:13 mail dovecot: lda(user@domain.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
-Jun  2 23:17:13 avalon dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
-Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap(user@domain.tld): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
-Jun  2 23:17:13 mail dovecot: imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
-Jun  2 23:17:13 mail dovecot: imap(username@domain.tld): Disconnected: Logged out in=123 out=123
-Jun  2 23:17:13 avalon dovecot: imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, TLS
-Jun  2 23:17:13 avalon dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
-Jun  2 23:17:13 mail dovecot: imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+lda(user@domain.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
+IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
+imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+imap(user@domain.tld): Warning: autocreate plugin is deprecated, use mailbox { auto } setting instead
+imap-login: Disconnected (no auth attempts in 0 secs): user=<>, rip=1.2.3.4, lip=1.2.3.4, TLS handshaking: Disconnected, session=<O3h6IVI0sQBQu1D7>
+imap-login: Login: user=<user@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
+imap(username@domain.tld): Disconnected: Logged out in=123 out=123
+imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, TLS
+IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
+imap-login: Login: user=<username@domain.tld>, method=PLAIN, rip=1.2.3.4, lip=1.2.3.4, mpid=123, TLS, session=<O3h6IVI0sQBQu1D7>
 
 ---
 

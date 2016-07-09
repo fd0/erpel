@@ -2,6 +2,60 @@ package rules
 
 import "testing"
 
+func equalMap(t testing.TB, name string, want map[string]string, got map[string]string) {
+	var keys []string
+	for key := range want {
+		keys = append(keys, key)
+	}
+	for key := range got {
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		v1, ok := want[key]
+		if !ok {
+			t.Errorf("%v: extra key %v found\n", name, key)
+			continue
+		}
+
+		v2, ok := got[key]
+		if !ok {
+			t.Errorf("%v: missing key %v\n", name, key)
+			continue
+		}
+
+		if v1 != v2 {
+			t.Errorf("%v: values are not equal, want %v, got %v", name, v1, v2)
+		}
+	}
+}
+
+func equalFields(t testing.TB, want map[string]Field, got map[string]Field) {
+	var keys []string
+	for key := range want {
+		keys = append(keys, key)
+	}
+	for key := range got {
+		keys = append(keys, key)
+	}
+
+	for _, key := range keys {
+		v1, ok := want[key]
+		if !ok {
+			t.Errorf("extra key %v found\n", key)
+			continue
+		}
+
+		v2, ok := got[key]
+		if !ok {
+			t.Errorf("missing key %v\n", key)
+			continue
+		}
+
+		equalMap(t, "Field "+key, v1, v2)
+	}
+}
+
 var testRuleConfigs = []struct {
 	cfg   string
 	state State
@@ -10,6 +64,15 @@ var testRuleConfigs = []struct {
 		cfg: ``,
 		state: State{
 			Fields: map[string]Field{},
+		},
+	},
+	{
+		cfg: `prefix = "foo"`,
+		state: State{
+			Fields: map[string]Field{},
+			Options: map[string]string{
+				"prefix": `"foo"`,
+			},
 		},
 	},
 	{
@@ -275,38 +338,8 @@ func TestParseRuleConfig(t *testing.T) {
 			continue
 		}
 
-		for fieldName, wantField := range test.state.Fields {
-			gotField, ok := state.Fields[fieldName]
-			if !ok {
-				t.Errorf("test %v: field %q not found in parsed result", i, fieldName)
-				continue
-			}
-
-			for key, v1 := range wantField {
-				v2, ok := gotField[key]
-				if !ok {
-					t.Errorf("test %v: missing statement %q in state parsed from config", i, key)
-					continue
-				}
-
-				if v1 != v2 {
-					t.Errorf("test %v: wrong value for %q: want %q, got %q", i, key, v1, v2)
-				}
-			}
-
-			for key, value := range gotField {
-				if _, ok := wantField[key]; !ok {
-					t.Errorf("test %v: unexpected statement %q found in field %q (value is %q)", i, key, fieldName, value)
-				}
-			}
-		}
-
-		for fieldName := range state.Fields {
-			_, ok := test.state.Fields[fieldName]
-			if !ok {
-				t.Errorf("test %v: unexpected field %q found in parsed result", i, fieldName)
-			}
-		}
+		equalFields(t, test.state.Fields, state.Fields)
+		equalMap(t, "Options", test.state.Options, state.Options)
 
 		if len(state.Templates) != len(test.state.Templates) {
 			t.Errorf("test %v: unexpected number of template lines returned: want %d, got %d",

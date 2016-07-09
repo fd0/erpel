@@ -13,8 +13,12 @@ import (
 type State struct {
 	// used to temporarily store values while parsing
 	name, value string
+	inField     bool
 
 	currentField Field
+
+	// global options
+	Options map[string]string
 
 	// collection of all fields encountered during parsing
 	Fields map[string]Field
@@ -35,10 +39,22 @@ func (c *State) newField(name string) {
 	c.currentField = f
 }
 
+func (c *State) setField(key, value string) {
+	c.currentField[key] = value
+}
+
+func (c *State) setOption(key, value string) {
+	c.Options[key] = value
+}
+
 func (c *State) set(key, value string) {
 	key = strings.TrimSpace(key)
 	value = strings.TrimSpace(value)
-	c.currentField[key] = value
+	if c.inField {
+		c.setField(key, value)
+	} else {
+		c.setOption(key, value)
+	}
 }
 
 func (c *State) addTemplate(s string) {
@@ -63,7 +79,8 @@ func Parse(data string) (State, error) {
 
 	c := &ruleParser{
 		State: State{
-			Fields: fields,
+			Fields:  fields,
+			Options: make(map[string]string),
 		},
 		Buffer: data,
 	}
