@@ -15,7 +15,7 @@ func init() {
 func LoadRules() error {
 	V("load rules from %v\n", rulesDir)
 
-	rules, err := erpel.ParseAllRulesFiles(rulesDir)
+	rules, err := erpel.ParseAllRulesFiles(globalFields, rulesDir)
 	if err != nil {
 		return err
 	}

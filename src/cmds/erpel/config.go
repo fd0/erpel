@@ -19,6 +19,8 @@ func init() {
 
 const configFileName = "erpel.conf"
 
+var globalFields map[string]erpel.Field
+
 // initConfig parses the configuration file.
 func initConfig() {
 	var err error
@@ -45,7 +47,7 @@ func parseConfig(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("parse config file %v failed: %v", configFile, err)
 	}
 
-	fmt.Printf("cfg: %v\n", cfg)
+	globalFields = cfg.Fields
 
 	return nil
 }

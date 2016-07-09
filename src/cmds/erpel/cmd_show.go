@@ -81,7 +81,7 @@ func ShowRules(wr io.Writer, args []string) error {
 
 	filename := args[0]
 
-	rules, err := erpel.ParseRulesFile(filename)
+	rules, err := erpel.ParseRulesFile(globalFields, filename)
 	if err != nil {
 		return err
 	}
