@@ -87,5 +87,12 @@ func ShowRules(args []string) error {
 		fmt.Println()
 	}
 
+	if debugOutput {
+		fmt.Printf("\nGenerated regexps:\n")
+		for _, r := range rules.RegExps() {
+			fmt.Printf("%s\n", r)
+		}
+	}
+
 	return nil
 }

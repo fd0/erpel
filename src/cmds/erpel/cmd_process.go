@@ -107,6 +107,15 @@ func Process(cmd *cobra.Command, args []string) error {
 		return errors.New("no log files to process")
 	}
 
+	if debugOutput {
+		fmt.Printf("\nGenerated regexps:\n")
+		for _, rules := range Rules {
+			for _, r := range rules.RegExps() {
+				fmt.Printf("%s\n", r)
+			}
+		}
+	}
+
 	for _, logfile := range args {
 		V("processing log file %v\n", logfile)
 
