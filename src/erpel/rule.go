@@ -244,6 +244,10 @@ func ParseAllRulesFiles(global map[string]Field, dir string) (rules []Rules, err
 			return nil, probe.Trace(err, file)
 		}
 
+		if err = r.Check(); err != nil {
+			return nil, probe.Trace(err, file)
+		}
+
 		rules = append(rules, r)
 	}
 
