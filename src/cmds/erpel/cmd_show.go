@@ -4,6 +4,7 @@ import (
 	"erpel"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -59,10 +60,11 @@ func ShowRules(args []string) error {
 		return err
 	}
 
-	if !ignoreRuleSamples {
-		if err = rules.Check(); err != nil {
+	if err = rules.Check(); err != nil {
+		if !ignoreRuleSamples {
 			return err
 		}
+		fmt.Fprintf(os.Stderr, "error checking rules file: %v\n", err)
 	}
 
 	fmt.Printf("Rules from %v:\n", filename)
