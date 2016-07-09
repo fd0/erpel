@@ -15,6 +15,8 @@ var testRulesFiles = []struct {
 }{
 	{
 		data: `
+prefix = "Jun  2 23:17:13 mail dovecot: "
+
 field msgid {
 	template = '20160602211704.9125E5A063@localhost'
 	pattern = '[a-zA-Z0-9.=@/-]+'
@@ -37,8 +39,8 @@ field num {
 
 ------------------
 
-Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
-Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
+lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'
+IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123
 
 --------------
 
@@ -82,8 +84,8 @@ Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/
 				},
 			},
 			Templates: []string{
-				`Jun  2 23:17:13 mail dovecot: lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'`,
-				`Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123`,
+				`lda(user@host.tld): sieve: msgid=<20160602211704.9125E5A063@localhost>: stored mail into mailbox 'INBOX'`,
+				`IMAP(username@domain.tld): Disconnected: Logged out bytes=123/123`,
 			},
 			Samples: []string{
 				`Jun  2 23:17:18 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'`,
@@ -129,6 +131,11 @@ func TestRulesParse(t *testing.T) {
 }
 
 func TestParseSampleRules(t *testing.T) {
+	cfg, err := ParseConfigFile(filepath.Join("testdata", "erpel.conf"))
+	if err != nil {
+		t.Fatalf("parsing sample config failed: %v", err)
+	}
+
 	files, err := filepath.Glob(filepath.Join("testdata", "*.rules"))
 	if err != nil {
 		t.Fatalf("unable to list directory testdata/: %v", err)
@@ -141,13 +148,17 @@ func TestParseSampleRules(t *testing.T) {
 			continue
 		}
 
-		rules, err := ParseRules(nil, string(buf))
+		rules, err := ParseRules(cfg.Fields, string(buf))
 		if err != nil {
 			t.Errorf("parsing rules file %v failed: %v", file, err)
 			continue
 		}
 
 		if err := rules.Check(); err != nil {
+			t.Logf("rules:")
+			for _, r := range rules.RegExps() {
+				t.Logf("  %s", r)
+			}
 			t.Errorf("checking rules in file %v failed: %v", file, err)
 			continue
 		}

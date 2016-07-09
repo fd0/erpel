@@ -15,6 +15,8 @@ import (
 
 // Rules holds all information parsed from a rules file.
 type Rules struct {
+	Prefix string
+
 	Fields       map[string]Field
 	GlobalFields map[string]Field
 	Templates    []string
@@ -66,10 +68,15 @@ func parseField(name string, field rules.Field) (f Field, err error) {
 }
 
 // parseRuleState returns a Rules from a state.
-func parseRuleState(global map[string]Field, state rules.State) (Rules, error) {
+func parseRuleState(global map[string]Field, state rules.State) (r Rules, err error) {
 	rules := Rules{
 		Fields:       make(map[string]Field),
 		GlobalFields: global,
+	}
+
+	rules.Prefix, err = unquoteString(state.Options["prefix"])
+	if err != nil {
+		return Rules{}, err
 	}
 
 	for name, field := range state.Fields {
@@ -94,7 +101,7 @@ func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 	}
 
 	for _, s := range r.Templates {
-		s = "^" + regexp.QuoteMeta(s) + "$"
+		s = "^" + r.Prefix + `\s*` + regexp.QuoteMeta(s) + "$"
 
 		// apply local fields first
 		for _, field := range r.Fields {
