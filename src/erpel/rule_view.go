@@ -70,6 +70,10 @@ func View(rules Rules, template string) RuleView {
 		data = applyField(field, data)
 	}
 
+	for _, field := range rules.GlobalFields {
+		data = applyField(field, data)
+	}
+
 	return data
 }
 

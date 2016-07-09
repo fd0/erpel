@@ -15,9 +15,10 @@ import (
 
 // Rules holds all information parsed from a rules file.
 type Rules struct {
-	Fields    map[string]Field
-	Templates []string
-	Samples   []string
+	Fields       map[string]Field
+	GlobalFields map[string]Field
+	Templates    []string
+	Samples      []string
 
 	rexs []*regexp.Regexp
 }
@@ -65,9 +66,10 @@ func parseField(name string, field rules.Field) (f Field, err error) {
 }
 
 // parseRuleState returns a Rules from a state.
-func parseRuleState(state rules.State) (Rules, error) {
+func parseRuleState(global map[string]Field, state rules.State) (Rules, error) {
 	rules := Rules{
-		Fields: make(map[string]Field),
+		Fields:       make(map[string]Field),
+		GlobalFields: global,
 	}
 
 	for name, field := range state.Fields {
@@ -94,7 +96,14 @@ func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 	for _, s := range r.Templates {
 		s = "^" + regexp.QuoteMeta(s) + "$"
 
+		// apply local fields first
 		for _, field := range r.Fields {
+			repl := regexp.QuoteMeta(field.Template)
+			s = strings.Replace(s, repl, field.Pattern.String(), -1)
+		}
+
+		// then apply global fields
+		for _, field := range r.GlobalFields {
 			repl := regexp.QuoteMeta(field.Template)
 			s = strings.Replace(s, repl, field.Pattern.String(), -1)
 		}
@@ -193,13 +202,13 @@ func (r *Rules) Check() error {
 }
 
 // ParseRules parses the data as an erpel rule file.
-func ParseRules(data string) (Rules, error) {
+func ParseRules(global map[string]Field, data string) (Rules, error) {
 	state, err := rules.Parse(data)
 	if err != nil {
 		return Rules{}, probe.Trace(err)
 	}
 
-	rules, err := parseRuleState(state)
+	rules, err := parseRuleState(global, state)
 	if err != nil {
 		return Rules{}, probe.Trace(err)
 	}
@@ -212,17 +221,17 @@ func ParseRules(data string) (Rules, error) {
 }
 
 // ParseRulesFile loads rules from a file and parses it.
-func ParseRulesFile(filename string) (Rules, error) {
+func ParseRulesFile(global map[string]Field, filename string) (Rules, error) {
 	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return Rules{}, err
 	}
 
-	return ParseRules(string(buf))
+	return ParseRules(global, string(buf))
 }
 
 // ParseAllRulesFiles loads rules from all files in the directory.
-func ParseAllRulesFiles(dir string) (rules []Rules, err error) {
+func ParseAllRulesFiles(global map[string]Field, dir string) (rules []Rules, err error) {
 	pattern := filepath.Join(dir, "*")
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
@@ -230,7 +239,7 @@ func ParseAllRulesFiles(dir string) (rules []Rules, err error) {
 	}
 
 	for _, file := range matches {
-		r, err := ParseRulesFile(file)
+		r, err := ParseRulesFile(global, file)
 		if err != nil {
 			return nil, probe.Trace(err, file)
 		}

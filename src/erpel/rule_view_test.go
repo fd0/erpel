@@ -2,7 +2,7 @@ package erpel
 
 import "testing"
 
-const ruleViewTestConfig = `
+const ruleViewTestGlobal = `
 # A field consists of a name and a template (to insert the field).
 field timestamp {
     template = 'Jun  2 23:17:13'
@@ -17,7 +17,9 @@ field IP {
 
     samples = ['192.168.100.1', '2003::feff:1234']
 }
+`
 
+const ruleViewTestConfig = `
 field msgid {
 	template = '20160602211704.9125E5A063@localhost'
 	pattern = '[a-zA-Z0-9.=@/-]+'
@@ -86,7 +88,12 @@ var ruleViewTests = []struct {
 }
 
 func parseRules(t testing.TB, data string) Rules {
-	rules, err := ParseRules(data)
+	cfg, err := ParseConfig(ruleViewTestGlobal)
+	if err != nil {
+		t.Fatalf("ParseConfig: %v", err)
+	}
+
+	rules, err := ParseRules(cfg.Fields, data)
 	if err != nil {
 		t.Fatalf("ParseRules: %v", err)
 	}

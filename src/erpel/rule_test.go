@@ -9,26 +9,12 @@ import (
 )
 
 var testRulesFiles = []struct {
-	data  string
-	rules Rules
+	data   string
+	global map[string]Field
+	rules  Rules
 }{
 	{
 		data: `
-# A field consists of a name and a template (to insert the field).
-field timestamp {
-    template = 'Jun  2 23:17:13'
-    pattern = '\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}'
-}
-
-# A field can also list examples, these must match the defined pattern.
-field IP {
-    template = '1.2.3.4'
-    # this matches IPv4 and IPv6 addresses
-    pattern = '(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})'
-
-    samples = ['192.168.100.1', '2003::feff:1234']
-}
-
 field msgid {
 	template = '20160602211704.9125E5A063@localhost'
 	pattern = '[a-zA-Z0-9.=@/-]+'
@@ -59,19 +45,21 @@ Jun  2 23:17:13 mail dovecot: IMAP(username@domain.tld): Disconnected: Logged ou
 Jun  2 23:17:18 mail dovecot: lda(me@domain.de): sieve: msgid=<20160602211704.9125E5A063@graphite.x.net>: stored mail into mailbox 'INBOX'
 Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/16042
 `,
+		global: map[string]Field{
+			"timestamp": Field{
+				Name:     "timestamp",
+				Template: "Jun  2 23:17:13",
+				Pattern:  regexp.MustCompile(`\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}`),
+			},
+			"IP": Field{
+				Name:     "IP",
+				Template: "1.2.3.4",
+				Pattern:  regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
+				Samples:  []string{"192.168.100.1", "2003::feff:1234"},
+			},
+		},
 		rules: Rules{
 			Fields: map[string]Field{
-				"timestamp": Field{
-					Name:     "timestamp",
-					Template: "Jun  2 23:17:13",
-					Pattern:  regexp.MustCompile(`\w{3}  ?\d{1,2} \d{2}:\d{2}:\d{2}`),
-				},
-				"IP": Field{
-					Name:     "IP",
-					Template: "1.2.3.4",
-					Pattern:  regexp.MustCompile(`(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|([0-9a-f]{0,4}:){0,7}[0-9a-f]{0,4})`),
-					Samples:  []string{"192.168.100.1", "2003::feff:1234"},
-				},
 				"msgid": Field{
 					Name:     "msgid",
 					Template: "20160602211704.9125E5A063@localhost",
@@ -107,7 +95,7 @@ Jun  2 23:17:22 mail dovecot: IMAP(foobar): Disconnected: Logged out bytes=1152/
 
 func TestRulesParse(t *testing.T) {
 	for i, test := range testRulesFiles {
-		rules, err := ParseRules(test.data)
+		rules, err := ParseRules(test.global, test.data)
 		if err != nil {
 			t.Errorf("test %v: parse failed: %v", i, err)
 			continue
@@ -153,7 +141,7 @@ func TestParseSampleRules(t *testing.T) {
 			continue
 		}
 
-		rules, err := ParseRules(string(buf))
+		rules, err := ParseRules(nil, string(buf))
 		if err != nil {
 			t.Errorf("parsing rules file %v failed: %v", file, err)
 			continue
