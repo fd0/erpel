@@ -121,7 +121,7 @@ func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 
 	if r.Prefix != "" && r.prefixReg == nil {
 		s := "^" + regexp.QuoteMeta(r.Prefix)
-		s = applyFields(r.Prefix, r.Fields)
+		s = applyFields(s, r.Fields)
 		s = applyFields(s, r.GlobalFields)
 		r.prefixReg = regexp.MustCompile(s)
 	}
@@ -207,9 +207,8 @@ func (f Field) Equals(other Field) bool {
 func (r *Rules) Match(s string) bool {
 	// test prefix first
 	if r.prefixReg != nil {
-		fmt.Printf(" prefix reg: %v\n", r.prefixReg)
-		if !r.prefixReg.MatchString(s) {
-			fmt.Printf("  prefix reg does not match string %q\n", s)
+		match := r.prefixReg.FindStringIndex(s)
+		if match == nil {
 			return false
 		}
 	}
