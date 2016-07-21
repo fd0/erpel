@@ -22,7 +22,8 @@ type Rules struct {
 	Templates    []string
 	Samples      []string
 
-	rexs []*regexp.Regexp
+	rexs      []*regexp.Regexp
+	prefixReg *regexp.Regexp
 }
 
 // Field is a dynamic section in a log message.
@@ -103,26 +104,34 @@ func parseRuleState(global map[string]Field, state rules.State) (r Rules, err er
 	return rules, nil
 }
 
+func applyFields(s string, fields map[string]Field) string {
+	for _, field := range fields {
+		repl := regexp.QuoteMeta(field.Template)
+		s = strings.Replace(s, repl, field.Pattern.String(), -1)
+	}
+
+	return s
+}
+
 // RegExps returns the rules as a list of regexps. These are cached internally.
 func (r *Rules) RegExps() (rules []*regexp.Regexp) {
 	if r.rexs != nil {
 		return r.rexs
 	}
 
+	if r.Prefix != "" && r.prefixReg == nil {
+		s := "^" + regexp.QuoteMeta(r.Prefix)
+		s = applyFields(r.Prefix, r.Fields)
+		s = applyFields(s, r.GlobalFields)
+		r.prefixReg = regexp.MustCompile(s)
+	}
+
 	for _, s := range r.Templates {
 		s = "^" + regexp.QuoteMeta(r.Prefix) + regexp.QuoteMeta(s) + "$"
 
-		// apply local fields first
-		for _, field := range r.Fields {
-			repl := regexp.QuoteMeta(field.Template)
-			s = strings.Replace(s, repl, field.Pattern.String(), -1)
-		}
-
-		// then apply global fields
-		for _, field := range r.GlobalFields {
-			repl := regexp.QuoteMeta(field.Template)
-			s = strings.Replace(s, repl, field.Pattern.String(), -1)
-		}
+		// apply local fields, then global
+		s = applyFields(s, r.Fields)
+		s = applyFields(s, r.GlobalFields)
 
 		re, err := regexp.Compile(s)
 		if err != nil {
@@ -196,6 +205,15 @@ func (f Field) Equals(other Field) bool {
 
 // Match tests if a rule matches s completely.
 func (r *Rules) Match(s string) bool {
+	// test prefix first
+	if r.prefixReg != nil {
+		fmt.Printf(" prefix reg: %v\n", r.prefixReg)
+		if !r.prefixReg.MatchString(s) {
+			fmt.Printf("  prefix reg does not match string %q\n", s)
+			return false
+		}
+	}
+
 	for _, rule := range r.RegExps() {
 		if err := checkPattern(rule, s); err == nil {
 			return true
