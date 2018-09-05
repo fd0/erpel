@@ -2,7 +2,6 @@ language: go
 sudo: false
 
 go:
-  - "1.10.x"
   - "1.11.x"
 
 install:
@@ -13,9 +12,9 @@ install:
   - go get golang.org/x/tools/cmd/goimports
 
 script:
-  - go test -v
-  - go build -mod=vendor
-  - go run -mod=vendor build.go || go run build.go
+  - GO111MODULE=on go test ./...
+  - GO111MODULE=on go build -mod=vendor
+  - GO111MODULE1on go run -mod=vendor build.go || go run build.go
   - diff <(goimports -d *.go) <(printf "")
 
 after_success:
