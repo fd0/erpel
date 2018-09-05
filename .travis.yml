@@ -2,21 +2,21 @@ language: go
 sudo: false
 
 go:
-  - 1.6.4
-  - 1.7.4
+  - "1.10.x"
+  - "1.11.x"
 
 install:
   - go version
   - export GOBIN="$GOPATH/bin"
   - export PATH="$PATH:$GOBIN"
-  - go get github.com/constabulary/gb/...
   - go get -u github.com/golang/lint/golint
   - go get golang.org/x/tools/cmd/goimports
-  - gb info
 
 script:
-  - gb build
-  - gb test
-  - go run build.go -v -T
-  - diff <(GOPATH="$PWD:$PWD/vendor" goimports -d ./src) <(printf "")
-  - diff <(golint ./src/...) <(printf "")
+  - go test -v
+  - go build -mod=vendor
+  - go run -mod=vendor build.go || go run build.go
+  - diff <(goimports -d *.go) <(printf "")
+
+after_success:
+  - diff <(golint ./...) <(printf "")
