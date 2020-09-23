@@ -13,7 +13,7 @@ install:
 
 script:
   - go test ./...
-  - go build -mod=vendor
+  - go build
   - diff <(goimports -d *.go) <(printf "")
 
 after_success:
