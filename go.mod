@@ -1,5 +1,7 @@
 module github.com/fd0/erpel
 
+go 1.15
+
 require (
 	github.com/BurntSushi/xdg v0.0.0-20130804141135-e80d3446fea1
 	github.com/fatih/color v1.7.0

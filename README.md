@@ -6,32 +6,13 @@ Filter log messages and only print those which did not match any filters.
 
 # Installation
 
-erpel requires Go version 1.4 or newer. To build `erpel`, run the following command:
+erpel requires Go version 1.11 or newer. To build `erpel`, run the following command:
 
 ```shell
-$ go run build.go
+$ go build
 ```
 
 Afterwards please find a binary `erpel` in the current directory.
-
-# Development
-
-erpel is developed using the build tool [gb](https://getgb.io). It can be installed by running the following command:
-
-```shell
-$ go get github.com/constabulary/gb/...
-```
-
-The program can be compiled using `gb` as follows:
-
-```shell
-$ gb build
-```
-
-The tests are run when calling `gb` as follows:
-```shell
-$ gb test
-```
 
 # Compatibility
 
