@@ -8,7 +8,7 @@ install:
   - go version
   - export GOBIN="$GOPATH/bin"
   - export PATH="$PATH:$GOBIN"
-  - go get -u github.com/golang/lint/golint
+  - go get -u golang.org/x/lint
   - go get golang.org/x/tools/cmd/goimports
 
 script:
