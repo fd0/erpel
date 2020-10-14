@@ -165,13 +165,8 @@ func checkPattern(r *regexp.Regexp, s string) error {
 	return nil
 }
 
-// Check returns an error if the field's pattern does not match the template or
-// the samples.
+// Check returns an error if the field's pattern does not match the samples.
 func (f *Field) Check() error {
-	if err := checkPattern(f.Pattern, f.Template); err != nil {
-		return errors.WithStack(err)
-	}
-
 	for _, sample := range f.Samples {
 		if err := checkPattern(f.Pattern, sample); err != nil {
 			return errors.WithStack(err)
